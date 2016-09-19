@@ -1,0 +1,78 @@
+﻿<metro:MetroWindow x:Class="KanColleOpenDB.Views.FirstPopup"
+				   xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+				   xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+				   xmlns:i="http://schemas.microsoft.com/expression/2010/interactivity"
+				   xmlns:ei="http://schemas.microsoft.com/expression/2010/interactions"
+				   xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+				   xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+				   xmlns:livet="http://schemas.livet-mvvm.net/2011/wpf"
+				   xmlns:metro="http://schemes.grabacr.net/winfx/2014/controls"
+				   xmlns:metro2="http://schemes.grabacr.net/winfx/2015/personal/controls"
+                   xmlns:KanColleOpenDB="clr-namespace:KanColleOpenDB"
+                   xmlns:KanColleOpenDBLibs="clr-namespace:KanColleOpenDB.Libs"
+                   xmlns:KanColleOpenDBViews="clr-namespace:KanColleOpenDB.Views"
+                   xmlns:KanColleOpenDBViewModels="clr-namespace:KanColleOpenDB.ViewModels"
+				   mc:Ignorable="d"
+				   d:DataContext="{d:DesignInstance KanColleOpenDBViewModels:DialogViewModel}"
+				   Style="{DynamicResource MetroDialogStyleKey}"
+				   Title="OpenDB Plugin"
+				   WindowStartupLocation="CenterScreen"
+				   SizeToContent="Height">
+    <metro:MetroWindow.Resources>
+        <ResourceDictionary>
+            <ResourceDictionary.MergedDictionaries>
+                <ResourceDictionary Source="pack://application:,,,/MetroRadiance;component/Styles/Controls.xaml" />
+                <ResourceDictionary Source="pack://application:,,,/MetroRadiance;component/Styles/Icons.xaml" />
+                <ResourceDictionary Source="pack://application:,,,/MetroRadiance;component/Themes/Dark.xaml" />
+                <ResourceDictionary Source="pack://application:,,,/MetroRadiance;component/Themes/Accents/Blue.xaml" />
+                <ResourceDictionary Source="pack://application:,,,/MetroTrilithon.Desktop;component/Styles/Controls.xaml" />
+            </ResourceDictionary.MergedDictionaries>
+
+            <BooleanToVisibilityConverter x:Key="BooleanToVisibility" />
+        </ResourceDictionary>
+    </metro:MetroWindow.Resources>
+
+    <i:Interaction.Triggers>
+        <livet:InteractionMessageTrigger Messenger="{Binding Messenger}"
+										 MessageKey="Window.WindowAction">
+            <livet:WindowInteractionMessageAction InvokeActionOnlyWhenWindowIsActive="False" />
+        </livet:InteractionMessageTrigger>
+        <livet:InteractionMessageTrigger Messenger="{Binding Messenger}"
+										 MessageKey="Window.Transition">
+            <livet:TransitionInteractionMessageAction InvokeActionOnlyWhenWindowIsActive="False" />
+        </livet:InteractionMessageTrigger>
+    </i:Interaction.Triggers>
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition />
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
+        </Grid.RowDefinitions>
+
+        <TextBlock FontSize="13"
+				   Foreground="{DynamicResource ActiveForegroundBrushKey}"
+				   Margin="10,0,10,10"
+                   TextWrapping="WrapWithOverflow"
+				   HorizontalAlignment="Left">
+            <Run Text="{Binding Resources.FirstPopup_Text, Source={x:Static KanColleOpenDBLibs:ResourceService.Current}, Mode=OneWay}" />
+        </TextBlock>
+
+        <StackPanel Grid.Row="2"
+					Orientation="Horizontal"
+					HorizontalAlignment="Right"
+					Margin="14,7,14,14">
+
+            <metro2:CallMethodButton Content="{Binding Resources.FirstPopup_KeepEnable, Source={x:Static KanColleOpenDBLibs:ResourceService.Current}, Mode=OneWay}"
+                                     MinWidth="100"
+									 Padding="20,5"
+									 MethodName="OK"
+									 Margin="12,0,0,0" />
+            <metro2:CallMethodButton Content="{Binding Resources.FirstPopup_Disable, Source={x:Static KanColleOpenDBLibs:ResourceService.Current}, Mode=OneWay}"
+                                     MinWidth="100"
+									 Padding="20,5"
+									 MethodName="Cancel"
+									 Margin="12,0,0,0" />
+
+        </StackPanel>
+    </Grid>
+</metro:MetroWindow>
