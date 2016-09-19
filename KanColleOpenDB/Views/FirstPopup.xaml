@@ -51,7 +51,7 @@
 
         <TextBlock FontSize="13"
 				   Foreground="{DynamicResource ActiveForegroundBrushKey}"
-				   Margin="10,0,10,10"
+				   Margin="10"
                    TextWrapping="WrapWithOverflow"
 				   HorizontalAlignment="Left">
             <Run Text="{Binding Resources.FirstPopup_Text, Source={x:Static KanColleOpenDBLibs:ResourceService.Current}, Mode=OneWay}" />
