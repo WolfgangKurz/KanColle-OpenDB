@@ -76,7 +76,6 @@ namespace KanColleOpenDB.ViewModels
             bool IsFirst = (bool)Properties.Settings.Default["IsFirst"];
             Enabled = (bool)Properties.Settings.Default["Enabled"];
 
-            IsFirst = true;
             if(IsFirst) // Is the first load after install?
             {
                 // Show alert popup
