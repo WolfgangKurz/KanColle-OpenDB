@@ -23,21 +23,27 @@ namespace KanColleOpenDB.Properties {
             }
         }
         
-        [global::System.Configuration.ApplicationScopedSettingAttribute()]
+        [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
         [global::System.Configuration.DefaultSettingValueAttribute("True")]
         public bool Enabled {
             get {
                 return ((bool)(this["Enabled"]));
             }
+            set {
+                this["Enabled"] = value;
+            }
         }
         
-        [global::System.Configuration.ApplicationScopedSettingAttribute()]
+        [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
         [global::System.Configuration.DefaultSettingValueAttribute("True")]
         public bool IsFirst {
             get {
                 return ((bool)(this["IsFirst"]));
+            }
+            set {
+                this["IsFirst"] = value;
             }
         }
     }

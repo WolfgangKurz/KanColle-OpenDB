@@ -78,23 +78,28 @@ namespace KanColleOpenDB.ViewModels
 
             if(IsFirst) // Is the first load after install?
             {
-                // Show alert popup
-                Application.Current.Dispatcher.Invoke(() =>
+                new Thread(() =>
                 {
-                    var vmodel = new DialogViewModel();
-                    var window = new FirstPopup
-                    {
-                        DataContext = vmodel,
-                        Owner = Application.Current.MainWindow,
-                    };
-                    window.Show();
+                    Thread.Sleep(1000);
 
-                    vmodel.PropertyChanged += (s, e) =>
+                    // Show alert popup
+                    Application.Current.Dispatcher.Invoke(() =>
                     {
-                        if (e.PropertyName == "DialogResult")
-                            Enabled = vmodel.DialogResult;
-                    };
-                });
+                        var vmodel = new DialogViewModel();
+                        var window = new FirstPopup
+                        {
+                            DataContext = vmodel,
+                            Owner = Application.Current.MainWindow,
+                        };
+                        window.ShowDialog();
+
+                        vmodel.PropertyChanged += (s, e) =>
+                        {
+                            if (e.PropertyName == "DialogResult")
+                                Application.Current.Dispatcher.Invoke(() => Enabled = vmodel.DialogResult);
+                        };
+                    });
+                }).Start();
             }
 
             // Save IsFirst setting

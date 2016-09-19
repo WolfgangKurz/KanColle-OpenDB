@@ -151,6 +151,7 @@
     </Compile>
     <Compile Include="KanColleOpenDBPlugin.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Settings.cs" />
     <Compile Include="ViewModels\DialogViewModel.cs" />
     <Compile Include="ViewModels\OpenDBViewModel.cs" />
     <Compile Include="Views\FirstPopup.xaml.cs">
