@@ -13,6 +13,7 @@ using Grabacr07.KanColleWrapper;
 using Grabacr07.KanColleWrapper.Models.Raw;
 
 using KanColleOpenDB.Libs;
+using KanColleOpenDB.Models;
 using KanColleOpenDB.Views;
 
 using System.Threading;
@@ -193,17 +194,23 @@ namespace KanColleOpenDB.ViewModels
             int drop_world = 0;
             int drop_map = 0;
             int drop_node = 0;
+            int drop_maprank = 0;
 
-            var drop_prepare = new Action<start_next>(x =>
+            var drop_prepare = new Action<kcsapi_start_next>(x =>
             {
                 drop_world = x.api_maparea_id;
                 drop_map = x.api_mapinfo_no;
                 drop_node = x.api_no;
+                drop_maprank = x.api_eventmap?.api_selected_rank ?? 0;
+                // 0:None, 丙:1, 乙:2, 甲:3
             });
             var drop_report = new Action<kcsapi_battleresult>(x =>
             {
                 ///////////////////////////////////////////////////////////////////
                 if (!Enabled) return; // Disabled sending statistics data to server
+
+                if (homeport.Organization.Ships.Count >= homeport.Admiral.MaxShipCount)
+                    return; // Maximum ship-count
 
                 var drop_shipid = 0;
                 var drop_rank = x.api_win_rank;
@@ -216,6 +223,7 @@ namespace KanColleOpenDB.ViewModels
                             "map=" + drop_map,
                             "node=" + drop_node,
                             "rank=" + drop_rank,
+                            "maprank=" + drop_maprank,
                             "result=" + drop_shipid
                         });
 
@@ -225,8 +233,8 @@ namespace KanColleOpenDB.ViewModels
             });
 
             // To gether Map-id
-            proxy.api_req_map_start.TryParse<start_next>().Subscribe(x => drop_prepare(x.Data));
-            proxy.api_req_map_next.TryParse<start_next>().Subscribe(x => drop_prepare(x.Data));
+            proxy.api_req_map_start.TryParse<kcsapi_start_next>().Subscribe(x => drop_prepare(x.Data));
+            proxy.api_req_map_next.TryParse<kcsapi_start_next>().Subscribe(x => drop_prepare(x.Data));
 
             // To gether dropped ship
             proxy.api_req_sortie_battleresult.TryParse<kcsapi_battleresult>().Subscribe(x => drop_report(x.Data));
