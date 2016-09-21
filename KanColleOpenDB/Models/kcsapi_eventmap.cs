@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace KanColleOpenDB.Models
 {
-    class kcsapi_eventmap
+    public class kcsapi_eventmap
     {
         public int api_now_maphp { get; set; }
         public int api_max_maphp { get; set; }
