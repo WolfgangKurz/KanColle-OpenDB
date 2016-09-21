@@ -24,6 +24,7 @@ namespace KanColleOpenDB.ViewModels
     {
         // OpenDB host
         private string OpenDBReport => "http://swaytwig.com/opendb/report/";
+        private int MAX_TRY => 3;
 
         #region Enabled Property
 
@@ -142,8 +143,17 @@ namespace KanColleOpenDB.ViewModels
                             "result=" + item
                         });
 
-                        HTTPRequest.Post(OpenDBReport + "equip_dev.php", post)
-                            ?.Close();
+                        int tries = MAX_TRY;
+                        while (tries > 0)
+                        {
+                            var y = HTTPRequest.Post(OpenDBReport + "equip_dev.php", post);
+                            if (y != null)
+                            {
+                                y?.Close();
+                                break;
+                            }
+                            tries--;
+                        }
                     }).Start();
                 });
 
@@ -185,8 +195,17 @@ namespace KanColleOpenDB.ViewModels
                             "result=" + ship
                         });
 
-                        HTTPRequest.Post(OpenDBReport + "ship_dev.php", post)
-                            ?.Close();
+                        int tries = MAX_TRY;
+                        while (tries > 0)
+                        {
+                            var y = HTTPRequest.Post(OpenDBReport + "ship_dev.php", post);
+                            if (y != null)
+                            {
+                                y?.Close();
+                                break;
+                            }
+                            tries--;
+                        }
                     }).Start();
                 });
 
@@ -227,8 +246,17 @@ namespace KanColleOpenDB.ViewModels
                             "result=" + drop_shipid
                         });
 
-                    HTTPRequest.Post(OpenDBReport + "ship_drop.php", post)
-                        ?.Close();
+                    int tries = MAX_TRY;
+                    while (tries > 0)
+                    {
+                        var y = HTTPRequest.Post(OpenDBReport + "ship_drop.php", post);
+                        if (y != null)
+                        {
+                            y?.Close();
+                            break;
+                        }
+                        tries--;
+                    }
                 }).Start();
             });
 
