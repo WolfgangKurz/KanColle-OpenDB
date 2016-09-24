@@ -10,4 +10,27 @@ Author [WolfgangKurz](http://swaytwig.com/) has all copyrights of data, for to p
 
 -
 
-[KanColle OpenDB Webpage](http://swaytwig.com/opendb/)
+### OpenDB Project Website
+[KanColle OpenDB Website](http://swaytwig.com/opendb/)
+
+### Developed Environment
+This plugin has developed on Windows 10 x64 Home, Visual Studio Community 2015.
+
+KanColleViewer Version 4.2.7 rev.207
+
+### Statistics data to send
+This plugin will send following statistical data:
+* Slotitem creation data
+* Ship build data
+* Ship drop data
+
+All data will be sent anonymously.
+
+### License
+* [The MIT License (MIT)](https://github.com/WolfgangKurz/Z-Subtitle/blob/master/LICENSE)
+
+This plugin is under MIT LICENSE.
+
+``` diff
+- Be careful! MIT License not applied to Whole OpenDB Project.
+```
