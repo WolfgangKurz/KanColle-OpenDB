@@ -1,6 +1,6 @@
-# KanColle-OpenDB-Plugin
+# KanColle-OpenDB
 
-KanColle OpenDB Plugin and OpenDB Database is Transparent opened project.
+KanColle OpenDB Plugin/Standalone and OpenDB Database is Transparent opened project.
 
 All data will be sent anonymously.
 Readers can query all reported data from OpenDB SQL Server.
@@ -16,10 +16,10 @@ Author [WolfgangKurz](http://swaytwig.com/) has all copyrights of data, for to p
 ### Developed Environment
 This plugin has developed on Windows 10 x64 Home, Visual Studio Community 2015.
 
-KanColleViewer Version 4.2.7 rev.207
+KanColleViewer Version 4.2.7 rev.207, KR.
 
 ### Statistics data to send
-This plugin will send following statistical data:
+This plugin/program will send following statistical data:
 * Slotitem creation data
 * Ship build data
 * Ship drop data
@@ -29,7 +29,7 @@ All data will be sent anonymously.
 ### License
 * [The MIT License (MIT)](https://github.com/WolfgangKurz/Z-Subtitle/blob/master/LICENSE)
 
-This plugin is under MIT LICENSE.
+This plugin/program is under MIT LICENSE.
 
 ``` diff
 - Be careful! MIT License not applied to Whole OpenDB Project.
