@@ -67,7 +67,7 @@ namespace KanColleOpenDBStandalone.Libs
             var x = new ManagedSession<T>(manager, this);
             return x.TryParse();
         }
-        public void Subscribe(Action<SvData> onEvent)
+        public ManagedSession Subscribe(Action<SvData> onEvent)
         {
             this.manager.Register((session) =>
             {
@@ -77,8 +77,9 @@ namespace KanColleOpenDBStandalone.Libs
                 this.parseEvent?.Invoke(session);
                 if (this.svData != null) onEvent?.Invoke(this.svData);
             });
+            return this;
         }
-        public void SubscribeRaw(Action<Session> onEvent)
+        public ManagedSession SubscribeRaw(Action<Session> onEvent)
         {
             this.manager.Register((session) =>
             {
@@ -87,6 +88,7 @@ namespace KanColleOpenDBStandalone.Libs
 
                 onEvent?.Invoke(session);
             });
+            return this;
         }
     }
     internal class ManagedSession<T> : ManagedSession
@@ -105,7 +107,7 @@ namespace KanColleOpenDBStandalone.Libs
             parseEvent = (session) => SvData.TryParse(session, out this.svData);
             return this;
         }
-        public void Subscribe(Action<SvData<T>> onEvent)
+        public ManagedSession<T> Subscribe(Action<SvData<T>> onEvent)
         {
             this.manager.Register((session) =>
             {
@@ -115,6 +117,7 @@ namespace KanColleOpenDBStandalone.Libs
                 this.parseEvent?.Invoke(session);
                 if (this.svData != null) onEvent?.Invoke(this.svData);
             });
+            return this;
         }
     }
 }

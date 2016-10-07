@@ -317,6 +317,79 @@ namespace KanColleOpenDBStandalone
                 .TryParse<kcsapi_ship_deck>().Subscribe(x => updateDeck2(x.Data));
             manager.Prepare().Where(x => x.Request.PathAndQuery == "/kcsapi/api_req_hensei/preset_select")
                 .TryParse<kcsapi_deck>().Subscribe(x => updateDeck3(x.Data));
+
+            // To check deck update and admiral information
+            var memberId = 0;
+            manager.Prepare().Where(x=>x.Request.PathAndQuery== "/kcsapi/api_port/port")
+                .TryParse<kcsapi_port>().Subscribe(x =>
+                {
+                    ships = x.Data.api_ship;
+                    updateDeck(x.Data.api_deck_port);
+
+                    memberId = 0;
+                    int.TryParse(x.Data.api_basic.api_member_id, out memberId);
+                });
+            manager.Prepare().Where(x=>x.Request.PathAndQuery== "/kcsapi/api_get_member/basic")
+                .TryParse<kcsapi_basic>().Subscribe(x =>
+                {
+                    memberId = 0;
+                    int.TryParse(x.Data.api_member_id, out memberId);
+                });
+
+
+            // Ranking List
+            var host = "";
+            manager.Prepare()
+                .Where(x => x.Request.PathAndQuery == "/kcsapi/api_req_ranking")
+                .SubscribeRaw(x => host = x.Request.Headers.Host)
+                .TryParse<kcsapi_req_ranking>()
+                .Subscribe(x =>
+                {
+                    if (!x.IsSuccess) return;
+
+                    string json = "";
+
+                    var page = x.Data.api_disp_page;
+                    var offset = (page - 1) * 10;
+                    if (offset >= 500) return; // only ~500
+
+                    var node = "";
+                    var nodes = new List<string>();
+                    var escape = new Func<string, string>(p => Uri.EscapeDataString(p));
+
+                    for (var i = 0; i < x.Data.api_list.Length; i++)
+                    {
+                        var named = new named_ranking(x.Data.api_list[i]);
+
+                        node = $"{{\"rank\":{named.rank},\"nick\":\"{escape(named.nick)}\","
+                            + $"\"medal\":{named.medal},\"score\":{named.score}}}";
+
+                        nodes.Add(node);
+                    }
+                    json = string.Join(",", nodes.ToArray());
+
+                    new Thread(() =>
+                    {
+                        string post = string.Join("&", new string[] {
+                            "apiver=" + 1,
+                            "server=" + host,
+                            "key=" + (memberId % 10),
+                            "data=" + System.Uri.EscapeDataString($"[{json}]")
+                        });
+
+                        int tries = MAX_TRY;
+                        while (tries > 0)
+                        {
+                            var y = HTTPRequest.Post(OpenDBReport + "rank_list.php", post);
+                            if (y != null)
+                            {
+                                y?.Close();
+                                break;
+                            }
+                            tries--;
+                        }
+                    }).Start();
+                });
         }
     }
 }

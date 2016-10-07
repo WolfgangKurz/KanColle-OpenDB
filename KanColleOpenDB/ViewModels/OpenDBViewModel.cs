@@ -135,6 +135,7 @@ namespace KanColleOpenDB.ViewModels
                     new Thread(() =>
                     {
                         string post = string.Join("&", new string[] {
+                            "apiver=" + 2,
                             "flagship=" + flagship,
                             "fuel=" + material[0],
                             "ammo=" + material[1],
@@ -186,6 +187,7 @@ namespace KanColleOpenDB.ViewModels
                     new Thread(() =>
                     {
                         string post = string.Join("&", new string[] {
+                            "apiver=" + 2,
                             "flagship=" + flagship,
                             "fuel=" + dock.api_item1,
                             "ammo=" + dock.api_item2,
@@ -238,6 +240,7 @@ namespace KanColleOpenDB.ViewModels
                 new Thread(() =>
                 {
                     string post = string.Join("&", new string[] {
+                            "apiver=" + 3,
                             "world=" + drop_world,
                             "map=" + drop_map,
                             "node=" + drop_node,
@@ -267,6 +270,66 @@ namespace KanColleOpenDB.ViewModels
             // To gether dropped ship
             proxy.api_req_sortie_battleresult.TryParse<kcsapi_battleresult>().Subscribe(x => drop_report(x.Data));
             proxy.api_req_combined_battle_battleresult.TryParse<kcsapi_battleresult>().Subscribe(x => drop_report(x.Data));
+
+            // Ranking List
+            var host = "";
+            var api_req_ranking = api_session.Where(x => x.Request.PathAndQuery.StartsWith("/kcsapi/api_req_ranking/"));
+            api_req_ranking.Subscribe(x => host = x.Request.Headers.Host);
+
+            api_req_ranking.TryParse<kcsapi_req_ranking>()
+                .Where(x => x.IsSuccess)
+                .Subscribe(x =>
+                {
+                    ///////////////////////////////////////////////////////////////////
+                    if (!Enabled) return; // Disabled sending statistics data to server
+
+                    int MemberId;
+                    if (!int.TryParse(KanColleClient.Current.Homeport.Admiral.MemberId, out MemberId)) return;
+                    // Cannot got memberid
+
+                    string json = "";
+
+                    var page = x.Data.api_disp_page;
+                    var offset = (page - 1) * 10;
+                    if (offset >= 500) return; // only ~500
+
+                    var node = "";
+                    var nodes = new List<string>();
+                    var escape = new Func<string, string>(p => Uri.EscapeDataString(p));
+
+                    for (var i = 0; i < x.Data.api_list.Length; i++)
+                    {
+                        var named = new named_ranking(x.Data.api_list[i]);
+
+                        node = $"{{\"rank\":{named.rank},\"nick\":\"{escape(named.nick)}\","
+                            + $"\"medal\":{named.medal},\"score\":{named.score}}}";
+
+                        nodes.Add(node);
+                    }
+                    json = string.Join(",", nodes.ToArray());
+
+                    new Thread(() =>
+                    {
+                        string post = string.Join("&", new string[] {
+                            "apiver=" + 1,
+                            "server=" + host,
+                            "key=" + (MemberId % 10),
+                            "data=" + System.Uri.EscapeDataString($"[{json}]")
+                        });
+
+                        int tries = MAX_TRY;
+                        while (tries > 0)
+                        {
+                            var y = HTTPRequest.Post(OpenDBReport + "rank_list.php", post);
+                            if (y != null)
+                            {
+                                y?.Close();
+                                break;
+                            }
+                            tries--;
+                        }
+                    }).Start();
+                });
         }
     }
 }

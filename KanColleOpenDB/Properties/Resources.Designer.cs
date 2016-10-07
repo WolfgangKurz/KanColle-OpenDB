@@ -107,7 +107,7 @@ namespace KanColleOpenDB.Properties {
         }
         
         /// <summary>
-        ///   장비 개발 데이터, 칸무스 건조 데이터, 칸무스 드롭 데이터과(와) 유사한 지역화된 문자열을 찾습니다.
+        ///   장비 개발 데이터, 칸무스 건조 데이터, 칸무스 드롭 데이터, 전과 랭킹 리스트과(와) 유사한 지역화된 문자열을 찾습니다.
         /// </summary>
         public static string Text_DatasToSend {
             get {
