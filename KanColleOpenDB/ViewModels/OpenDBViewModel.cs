@@ -291,7 +291,7 @@ namespace KanColleOpenDB.ViewModels
 
                     var page = x.Data.api_disp_page;
                     var offset = (page - 1) * 10;
-                    if (offset >= 500) return; // only ~500
+                    if (offset >= 1000) return; // only ~1000
 
                     var node = "";
                     var nodes = new List<string>();
