@@ -134,6 +134,6 @@
     <value>プラグインは以下の統計データをサーバーに送信します。</value>
   </data>
   <data name="Text_DatasToSend" xml:space="preserve">
-    <value>装備の開発データ、艦娘の建造データ、艦娘のドロップデータ、戦果ランキングリスト</value>
+    <value>装備の開発データ、艦娘の建造データ、艦娘のドロップデータ、戦果ランキングリスト、装備改修データ</value>
   </data>
 </root>

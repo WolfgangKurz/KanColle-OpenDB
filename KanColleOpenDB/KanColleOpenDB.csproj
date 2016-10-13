@@ -140,6 +140,7 @@
     <Compile Include="Libs\HTTPRequest.cs" />
     <Compile Include="Libs\ResourceService.cs" />
     <Compile Include="Models\kcsapi_eventmap.cs" />
+    <Compile Include="Models\kcsapi_req_kousyou.cs" />
     <Compile Include="Models\kcsapi_req_ranking.cs" />
     <Compile Include="Models\kcsapi_start_next.cs" />
     <Compile Include="Properties\Resources.Designer.cs">

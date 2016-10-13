@@ -134,6 +134,6 @@ Send to server option has enabled as default. You can disable if you don't want.
     <value>The plugin will send the following statistical data to the server.</value>
   </data>
   <data name="Text_DatasToSend" xml:space="preserve">
-    <value>Slotitem creation data, Ship build data, Ship drop data, Record ranking list</value>
+    <value>Slotitem creation data, Ship build data, Ship drop data, Record ranking list, Slotitem improvement data</value>
   </data>
 </root>

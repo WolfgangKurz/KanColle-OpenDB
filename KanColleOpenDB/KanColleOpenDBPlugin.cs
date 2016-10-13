@@ -17,7 +17,7 @@ namespace KanColleOpenDB
     [ExportMetadata("Guid", "B139EAC7-933F-4B35-9EE9-048B8F9F08E5")]
     [ExportMetadata("Title", "KanColleOpenDB")]
     [ExportMetadata("Description", "KanColleOpenDB for KanColleViewer")]
-    [ExportMetadata("Version", "1.0.4")]
+    [ExportMetadata("Version", "1.0.5")]
     [ExportMetadata("Author", "WolfgangKurz")]
     public class KanColleOpenDBPlugin : IPlugin, ITool
     {

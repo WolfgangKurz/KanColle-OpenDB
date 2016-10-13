@@ -112,7 +112,8 @@ namespace KanColleOpenDB.ViewModels
             var proxy = KanColleClient.Current.Proxy;
             var api_session = proxy.ApiSessionSource;
 
-            // Development (Create slotitem at arsenal)
+            #region Development (Create slotitem at arsenal)
+
             proxy.api_req_kousyou_createitem
                 .TryParse<kcsapi_createitem>()
                 .Where(x => x.IsSuccess).Subscribe(x =>
@@ -157,8 +158,10 @@ namespace KanColleOpenDB.ViewModels
                         }
                     }).Start();
                 });
+            #endregion
 
-            // Construction (Build new ship at arsenal)
+            #region Construction (Build new ship at arsenal)
+
             bool ship_dev_wait = false;
             int ship_dev_dockid = 0;
 
@@ -210,8 +213,10 @@ namespace KanColleOpenDB.ViewModels
                         }
                     }).Start();
                 });
+            #endregion
 
-            // Drop (Get new ship from sea)
+            #region Drop (Get new ship from sea)
+
             int drop_world = 0;
             int drop_map = 0;
             int drop_node = 0;
@@ -271,7 +276,10 @@ namespace KanColleOpenDB.ViewModels
             proxy.api_req_sortie_battleresult.TryParse<kcsapi_battleresult>().Subscribe(x => drop_report(x.Data));
             proxy.api_req_combined_battle_battleresult.TryParse<kcsapi_battleresult>().Subscribe(x => drop_report(x.Data));
 
-            // Ranking List
+            #endregion
+
+            #region Ranking List
+
             var host = "";
             var api_req_ranking = api_session.Where(x => x.Request.PathAndQuery.StartsWith("/kcsapi/api_req_ranking/"));
             api_req_ranking.Subscribe(x => host = x.Request.Headers.Host);
@@ -330,6 +338,55 @@ namespace KanColleOpenDB.ViewModels
                         }
                     }).Start();
                 });
+
+            #endregion
+
+            #region Slotitem Improvement (Remodel slotitem)
+
+            proxy.api_req_kousyou_remodel_slot.TryParse<KanColleOpenDB.Models.kcsapi_remodel_slot>()
+                .Where(x => x.IsSuccess).Subscribe(x =>
+                {
+                    ///////////////////////////////////////////////////////////////////
+                    if (!Enabled) return; // Disabled sending statistics data to server
+
+                    var item = x.Data.api_remodel_id[0]; // Slotitem master id
+                    var flagship = homeport.Organization.Fleets[1].Ships[0].Info.Id; // Flagship (Akashi or Akashi Kai)
+                    var assistant = x.Data.api_voice_ship_id; // Assistant ship master id
+                    var level = x.Data.api_after_slot.api_level; // After level
+                    var result = x.Data.api_remodel_flag; // Is succeeded?
+
+                    if (result == 1)
+                    {
+                        level--;
+                        if (level < 0) level = 10;
+                    }
+
+                    new Thread(() =>
+                    {
+                        string post = string.Join("&", new string[] {
+                            "apiver=" + 1,
+                            "flagship=" + flagship,
+                            "assistant=" + assistant,
+                            "item=" + item,
+                            "level=" + level,
+                            "result=" + result
+                        });
+
+                        int tries = MAX_TRY;
+                        while (tries > 0)
+                        {
+                            var y = HTTPRequest.Post(OpenDBReport + "equip_remodel.php", post);
+                            if (y != null)
+                            {
+                                y?.Close();
+                                break;
+                            }
+                            tries--;
+                        }
+                    }).Start();
+                });
+
+            #endregion
         }
     }
 }
