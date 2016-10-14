@@ -411,6 +411,8 @@ namespace KanColleOpenDBStandalone
                 {
                     if (!x.IsSuccess) return;
 
+                    if (int.Parse(x.Request["api_certain_flag"]) == 1) return; // 100% improvement option used
+
                     var item = x.Data.api_remodel_id[0]; // Slotitem master id
                     var flagship = this.Flagship; // Flagship (Akashi or Akashi Kai)
                     var assistant = x.Data.api_voice_ship_id; // Assistant ship master id
