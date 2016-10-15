@@ -1,101 +1,101 @@
 ﻿<UserControl
-            xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
-            xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-            xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
-            xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
-            xmlns:metro="http://schemes.grabacr.net/winfx/2014/controls"
-            xmlns:metro2="http://schemes.grabacr.net/winfx/2015/personal/controls"
-            xmlns:wrapper="clr-namespace:Grabacr07.KanColleWrapper;assembly=KanColleWrapper"
-            xmlns:KanColleOpenDB="clr-namespace:KanColleOpenDB"
-            xmlns:KanColleOpenDBLibs="clr-namespace:KanColleOpenDB.Libs"
-            xmlns:KanColleOpenDBViews="clr-namespace:KanColleOpenDB.Views"
-            xmlns:KanColleOpenDBViewModels="clr-namespace:KanColleOpenDB.ViewModels"
-            x:Class="KanColleOpenDB.Views.OpenDBView"
-            mc:Ignorable="d" 
-            d:DataContext="{d:DesignInstance {x:Type KanColleOpenDBViewModels:OpenDBViewModel}}"
-            d:DesignWidth="520"
-            d:DesignHeight="360">
-    <UserControl.Resources>
-        <ResourceDictionary>
-            <ResourceDictionary.MergedDictionaries>
-                <ResourceDictionary Source="pack://application:,,,/MetroRadiance;component/Styles/Controls.xaml" />
-                <ResourceDictionary Source="pack://application:,,,/MetroRadiance;component/Styles/Icons.xaml" />
-                <ResourceDictionary Source="pack://application:,,,/MetroRadiance;component/Themes/Dark.xaml" />
-                <ResourceDictionary Source="pack://application:,,,/MetroRadiance;component/Themes/Accents/Blue.xaml" />
+			xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+			xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+			xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+			xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+			xmlns:metro="http://schemes.grabacr.net/winfx/2014/controls"
+			xmlns:metro2="http://schemes.grabacr.net/winfx/2015/personal/controls"
+			xmlns:wrapper="clr-namespace:Grabacr07.KanColleWrapper;assembly=KanColleWrapper"
+			xmlns:KanColleOpenDB="clr-namespace:KanColleOpenDB"
+			xmlns:KanColleOpenDBLibs="clr-namespace:KanColleOpenDB.Libs"
+			xmlns:KanColleOpenDBViews="clr-namespace:KanColleOpenDB.Views"
+			xmlns:KanColleOpenDBViewModels="clr-namespace:KanColleOpenDB.ViewModels"
+			x:Class="KanColleOpenDB.Views.OpenDBView"
+			mc:Ignorable="d" 
+			d:DataContext="{d:DesignInstance {x:Type KanColleOpenDBViewModels:OpenDBViewModel}}"
+			d:DesignWidth="520"
+			d:DesignHeight="360">
+	<UserControl.Resources>
+		<ResourceDictionary>
+			<ResourceDictionary.MergedDictionaries>
+				<ResourceDictionary Source="pack://application:,,,/MetroRadiance;component/Styles/Controls.xaml" />
+				<ResourceDictionary Source="pack://application:,,,/MetroRadiance;component/Styles/Icons.xaml" />
+				<ResourceDictionary Source="pack://application:,,,/MetroRadiance;component/Themes/Dark.xaml" />
+				<ResourceDictionary Source="pack://application:,,,/MetroRadiance;component/Themes/Accents/Blue.xaml" />
 
-                <ResourceDictionary Source="pack://application:,,,/MetroTrilithon.Desktop;component/Styles/Controls.xaml" />
-                <ResourceDictionary Source="pack://application:,,,/KanColleViewer.Controls;component/Styles/Colors.xaml" />
-                <ResourceDictionary Source="pack://application:,,,/KanColleViewer.Controls;component/Styles/Controls.xaml" />
-                <ResourceDictionary Source="pack://application:,,,/KanColleViewer;component/Styles/Controls.xaml" />
-            </ResourceDictionary.MergedDictionaries>
+				<ResourceDictionary Source="pack://application:,,,/MetroTrilithon.Desktop;component/Styles/Controls.xaml" />
+				<ResourceDictionary Source="pack://application:,,,/KanColleViewer.Controls;component/Styles/Colors.xaml" />
+				<ResourceDictionary Source="pack://application:,,,/KanColleViewer.Controls;component/Styles/Controls.xaml" />
+				<ResourceDictionary Source="pack://application:,,,/KanColleViewer;component/Styles/Controls.xaml" />
+			</ResourceDictionary.MergedDictionaries>
 
-            <BooleanToVisibilityConverter x:Key="BooleanToVisibility" />
-        </ResourceDictionary>
-    </UserControl.Resources>
+			<BooleanToVisibilityConverter x:Key="BooleanToVisibility" />
+		</ResourceDictionary>
+	</UserControl.Resources>
 
-    <Grid>
-        <Grid.RowDefinitions>
-            <RowDefinition Height="*" />
-            <RowDefinition Height="Auto" />
-            <RowDefinition Height="Auto" />
-        </Grid.RowDefinitions>
+	<Grid>
+		<Grid.RowDefinitions>
+			<RowDefinition Height="*" />
+			<RowDefinition Height="Auto" />
+			<RowDefinition Height="Auto" />
+		</Grid.RowDefinitions>
 
-        <ScrollViewer Margin="5"
-                      PanningMode="Both"
-                      VerticalScrollBarVisibility="Auto">
-            <StackPanel>
-                <CheckBox IsChecked="{Binding Enabled}"
-                          Content="{Binding Resources.Option_Enable, Source={x:Static KanColleOpenDBLibs:ResourceService.Current}, Mode=OneWay}" />
+		<ScrollViewer Margin="5"
+					  PanningMode="Both"
+					  VerticalScrollBarVisibility="Auto">
+			<StackPanel>
+				<CheckBox IsChecked="{Binding Enabled}"
+						  Content="{Binding Resources.Option_Enable, Source={x:Static KanColleOpenDBLibs:ResourceService.Current}, Mode=OneWay}" />
 
-                <TextBlock Margin="20,6,0,0"
-                           Style="{DynamicResource DefaultTextStyleKey}"
-                           Text="{Binding Resources.Text_DataInfo, Source={x:Static KanColleOpenDBLibs:ResourceService.Current}, Mode=OneWay}" />
+				<TextBlock Margin="20,6,0,0"
+						   Style="{DynamicResource DefaultTextStyleKey}"
+						   Text="{Binding Resources.Text_DataInfo, Source={x:Static KanColleOpenDBLibs:ResourceService.Current}, Mode=OneWay}" />
 
-                <TextBlock Margin="20,4,0,0"
-                           Style="{DynamicResource DefaultTextStyleKey}"
-                           Text="{Binding Resources.Text_DatasToSend, Source={x:Static KanColleOpenDBLibs:ResourceService.Current}, Mode=OneWay}" />
-            </StackPanel>
-        </ScrollViewer>
+				<TextBlock Margin="20,4,0,0"
+						   Style="{DynamicResource DefaultTextStyleKey}"
+						   Text="{Binding Resources.Text_DatasToSend, Source={x:Static KanColleOpenDBLibs:ResourceService.Current}, Mode=OneWay}" />
+			</StackPanel>
+		</ScrollViewer>
 
-        <StackPanel Grid.Row="1"
-                    Margin="5,0">
-            <Rectangle Height=".99"
-                       Margin="0,5"
-                       Fill="{DynamicResource InactiveForegroundBrushKey}"
-                       Opacity="0.5" />
+		<StackPanel Grid.Row="1"
+					Margin="5,0">
+			<Rectangle Height=".99"
+					   Margin="0,5"
+					   Fill="{DynamicResource InactiveForegroundBrushKey}"
+					   Opacity="0.5" />
 
-            <TextBlock Style="{DynamicResource DefaultTextStyleKey}">
-                <Run Text="KanColle OpenDB Plugin and OpenDB Database is Transparent opened project." />
-                <LineBreak />
-                <Run Text="All data will be sent anonymously." />
-                <Run Text="Readers can query all reported data from OpenDB SQL Server." />
-                <LineBreak />
-                <Run Text="Anyone can report to server. OpenDB provides ReportAPI to everyone." />
-                <Run Text="Author WolfgangKurz has all copyrights of data, for to prevent data's unauthorized use." />
-            </TextBlock>
+			<TextBlock Style="{DynamicResource DefaultTextStyleKey}">
+				<Run Text="KanColle OpenDB Plugin and OpenDB Database is Transparent opened project." />
+				<LineBreak />
+				<Run Text="All data will be sent anonymously." />
+				<Run Text="Readers can query all reported data from OpenDB SQL Server." />
+				<LineBreak />
+				<Run Text="Anyone can report to server. OpenDB provides ReportAPI to everyone." />
+				<Run Text="Author WolfgangKurz has all copyrights of data, for to prevent data's unauthorized use." />
+			</TextBlock>
 
-            <Rectangle Height=".99"
-                       Margin="0,5"
-                       Fill="{DynamicResource InactiveForegroundBrushKey}"
-                       Opacity="0.5" />
-        </StackPanel>
+			<Rectangle Height=".99"
+					   Margin="0,5"
+					   Fill="{DynamicResource InactiveForegroundBrushKey}"
+					   Opacity="0.5" />
+		</StackPanel>
 
-        <Grid Grid.Row="2" Margin="5">
-            <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="auto"/>
-                <ColumnDefinition Width="*"/>
-                <ColumnDefinition Width="auto"/>
-            </Grid.ColumnDefinitions>
+		<Grid Grid.Row="2" Margin="5">
+			<Grid.ColumnDefinitions>
+				<ColumnDefinition Width="auto"/>
+				<ColumnDefinition Width="*"/>
+				<ColumnDefinition Width="auto"/>
+			</Grid.ColumnDefinitions>
 
-            <TextBlock Grid.Column="2"
-                       TextAlignment="Right"
-                       Style="{DynamicResource DefaultTextStyleKey}">
-                <metro2:HyperlinkEx Uri="http://swaytwig.com/opendb/">
-                    <Run Text="KanColle OpenDB Project" />
-                </metro2:HyperlinkEx>
-                <Run Text=" Present, ver" />
-                <Run Text="{Binding PluginVersion, Mode=OneWay}" />
-            </TextBlock>
-        </Grid>
-    </Grid>
+			<TextBlock Grid.Column="2"
+					   TextAlignment="Right"
+					   Style="{DynamicResource DefaultTextStyleKey}">
+				<metro2:HyperlinkEx Uri="http://swaytwig.com/opendb/">
+					<Run Text="KanColle OpenDB Project" />
+				</metro2:HyperlinkEx>
+				<Run Text=" Present, ver" />
+				<Run Text="{Binding PluginVersion, Mode=OneWay}" />
+			</TextBlock>
+		</Grid>
+	</Grid>
 </UserControl>

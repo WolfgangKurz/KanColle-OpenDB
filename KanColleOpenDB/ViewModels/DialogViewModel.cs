@@ -7,23 +7,23 @@ using MetroTrilithon.Mvvm;
 
 namespace KanColleOpenDB.ViewModels
 {
-    public class DialogViewModel : WindowViewModel
-    {
-        public DialogViewModel()
-        {
-            this.DialogResult = false;
-        }
+	public class DialogViewModel : WindowViewModel
+	{
+		public DialogViewModel()
+		{
+			this.DialogResult = false;
+		}
 
-        public void OK()
-        {
-            this.DialogResult = true;
-            this.Close();
-        }
+		public void OK()
+		{
+			this.DialogResult = true;
+			this.Close();
+		}
 
-        public void Cancel()
-        {
-            this.DialogResult = false;
-            this.Close();
-        }
-    }
+		public void Cancel()
+		{
+			this.DialogResult = false;
+			this.Close();
+		}
+	}
 }

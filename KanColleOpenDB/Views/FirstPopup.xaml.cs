@@ -15,14 +15,14 @@ using System.Windows.Shapes;
 
 namespace KanColleOpenDB.Views
 {
-    /// <summary>
-    /// FirstPopup.xaml에 대한 상호 작용 논리
-    /// </summary>
-    public partial class FirstPopup
-    {
-        public FirstPopup()
-        {
-            InitializeComponent();
-        }
-    }
+	/// <summary>
+	/// FirstPopup.xaml에 대한 상호 작용 논리
+	/// </summary>
+	public partial class FirstPopup
+	{
+		public FirstPopup()
+		{
+			InitializeComponent();
+		}
+	}
 }
