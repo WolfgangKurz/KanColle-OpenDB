@@ -55,12 +55,16 @@ namespace KanColleOpenDBStandalone
 			this.ShipCount = 0;
 			this.ShipLimit = 0;
 
+			#region Homeport processor
+
 			// Check for flagship and  ship count
 			kcsapi_ship2[] ships = new kcsapi_ship2[0];
 			int[][] fleet = new int[][]
 			{
 				new int[6], new int[6], new int[6], new int[6]
 			};
+
+			Dictionary<int, kcsapi_slotitem> slotItems = new Dictionary<int, kcsapi_slotitem>();
 
 			var updateDeck3 = new Action<kcsapi_deck>(x =>
 			{
@@ -98,6 +102,72 @@ namespace KanColleOpenDBStandalone
 			manager.Prepare()
 				.Where(x => x.Request.PathAndQuery == "/kcsapi/api_port/port")
 				.TryParse<kcsapi_port>().Subscribe(x => updateHomeport(x));
+
+			var updateSlot = new Action<kcsapi_slotitem[]>(x =>
+			{
+				slotItems = new Dictionary<int, kcsapi_slotitem>(
+					x.Select(y => y)
+						.ToDictionary(y => y.api_id)
+				);
+			});
+			var createSlot = new Action<kcsapi_createitem>(x =>
+			{
+				if (x.api_create_flag == 1 && x.api_slot_item != null)
+					slotItems.Add(x.api_slot_item.api_id, x.api_slot_item);
+			});
+			var destroySlot = new Action<SvData<kcsapi_destroyitem2>>(x =>
+			{
+				if (!x.IsSuccess) return;
+				try
+				{
+					foreach (var y in x.Request["api_slotitem_ids"].Split(',').Select(int.Parse))
+						slotItems.Remove(y);
+				}
+				catch (Exception ex)
+				{
+					Debug.WriteLine("Failed to destroy slotitem: {0}", ex);
+				}
+			});
+
+			var removeFromRemodel = new Action<KanColleOpenDBStandalone.Models.kcsapi_remodel_slot>(x =>
+			{
+				if (x.api_use_slot_id != null)
+				{
+					foreach (var id in x.api_use_slot_id)
+						slotItems.Remove(id);
+				}
+			});
+			var remodelSlotItem = new Action<KanColleOpenDBStandalone.Models.kcsapi_remodel_slot>(x =>
+			{
+				if (x.api_after_slot == null) return;
+				if (!slotItems.ContainsKey(x.api_after_slot.api_id)) return;
+
+				var y = slotItems[x.api_after_slot.api_id];
+				y.api_id = x.api_after_slot.api_slotitem_id;
+				y.api_level = x.api_after_slot.api_level;
+			});
+
+		manager.Prepare()
+				.Where(x => x.Request.PathAndQuery == "/kcsapi/api_get_member/slot_item")
+				.TryParse<kcsapi_slotitem[]>().Subscribe(x => updateSlot(x.Data));
+
+			manager.Prepare()
+				.Where(x => x.Request.PathAndQuery == "/kcsapi/api_req_kousyou/createitem")
+				.TryParse<kcsapi_createitem>().Subscribe(x => createSlot(x.Data));
+			manager.Prepare()
+				.Where(x => x.Request.PathAndQuery == "/kcsapi/api_req_kousyou/destroyitem2")
+				.TryParse<kcsapi_destroyitem2>().Subscribe(x => destroySlot(x));
+
+			manager.Prepare()
+				.Where(x => x.Request.PathAndQuery == "/kcsapi/api_req_kousyou/remodel_slot")
+				.TryParse<KanColleOpenDBStandalone.Models.kcsapi_remodel_slot>()
+				.Subscribe(x =>
+				{
+					removeFromRemodel(x.Data);
+					remodelSlotItem(x.Data);
+				});
+
+			#endregion
 
 
 			#region Development (Create slotitem at arsenal)
@@ -416,19 +486,25 @@ namespace KanColleOpenDBStandalone
 					var item = x.Data.api_remodel_id[0]; // Slotitem master id
 					var flagship = this.Flagship; // Flagship (Akashi or Akashi Kai)
 					var assistant = x.Data.api_voice_ship_id; // Assistant ship master id
-					var level = x.Data.api_after_slot.api_level; // After level
+					var level = 0; // After level
 					var result = x.Data.api_remodel_flag; // Is succeeded?
+
+					// !!! api_after_slot is null when failed to improve !!!
 
 					if (result == 1)
 					{
-						level--;
+						level = x.Data.api_after_slot.api_level - 1;
 						if (level < 0) level = 10;
+					}
+					else
+					{
+						level = slotItems[x.Data.api_remodel_id[0]].api_level;
 					}
 
 					new Thread(() =>
 					{
 						string post = string.Join("&", new string[] {
-							"apiver=" + 1,
+							"apiver=" + 2,
 							"flagship=" + flagship,
 							"assistant=" + assistant,
 							"item=" + item,
