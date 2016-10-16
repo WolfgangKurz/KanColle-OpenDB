@@ -354,19 +354,27 @@ namespace KanColleOpenDB.ViewModels
 					var item = x.Data.api_remodel_id[0]; // Slotitem master id
 					var flagship = homeport.Organization.Fleets[1].Ships[0].Info.Id; // Flagship (Akashi or Akashi Kai)
 					var assistant = x.Data.api_voice_ship_id; // Assistant ship master id
-					var level = x.Data.api_after_slot.api_level; // After level
+					var level = 0; // After level
 					var result = x.Data.api_remodel_flag; // Is succeeded?
+
+					// !!! api_after_slot is null when failed to improve !!!
 
 					if (result == 1)
 					{
-						level--;
+						level = x.Data.api_after_slot.api_level - 1;
 						if (level < 0) level = 10;
+					}
+					else
+					{
+						level = homeport.Itemyard.SlotItems[
+							int.Parse(x.Request["api_slot_id"])
+						].Level;
 					}
 
 					new Thread(() =>
 					{
 						string post = string.Join("&", new string[] {
-							"apiver=" + 1,
+							"apiver=" + 2,
 							"flagship=" + flagship,
 							"assistant=" + assistant,
 							"item=" + item,
