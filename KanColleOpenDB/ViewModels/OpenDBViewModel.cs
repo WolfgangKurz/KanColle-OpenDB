@@ -22,6 +22,12 @@ namespace KanColleOpenDB.ViewModels
 {
 	public class OpenDBViewModel : ViewModel
 	{
+#if DEBUG
+		private bool DEBUG => true;
+#else
+		private bool DEBUG => false;
+#endif
+
 		// OpenDB host
 		private string OpenDBReport => "http://swaytwig.com/opendb/report/";
 		private int MAX_TRY => 3;
@@ -51,7 +57,7 @@ namespace KanColleOpenDB.ViewModels
 		{
 			get
 			{
-				return System.Reflection.Assembly.GetExecutingAssembly().GetName().Version.ToString(3);
+				return System.Reflection.Assembly.GetExecutingAssembly().GetName().Version.ToString(4);
 			}
 		}
 
@@ -78,7 +84,7 @@ namespace KanColleOpenDB.ViewModels
 			bool IsFirst = (bool)Properties.Settings.Default["IsFirst"];
 			Enabled = (bool)Properties.Settings.Default["Enabled"];
 
-			if(IsFirst) // Is the first load after install?
+			if(IsFirst || DEBUG) // Is the first load after install?
 			{
 				new Thread(() =>
 				{
@@ -93,13 +99,7 @@ namespace KanColleOpenDB.ViewModels
 							DataContext = vmodel,
 							Owner = Application.Current.MainWindow,
 						};
-						window.ShowDialog();
-
-						vmodel.PropertyChanged += (s, e) =>
-						{
-							if (e.PropertyName == "DialogResult")
-								Application.Current.Dispatcher.Invoke(() => Enabled = vmodel.DialogResult);
-						};
+						Enabled = window.ShowDialog() ?? true;
 					});
 				}).Start();
 			}
