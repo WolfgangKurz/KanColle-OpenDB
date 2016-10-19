@@ -99,7 +99,8 @@ namespace KanColleOpenDB.ViewModels
 							DataContext = vmodel,
 							Owner = Application.Current.MainWindow,
 						};
-						Enabled = window.ShowDialog() ?? true;
+						var x = window.ShowDialog() ?? true;
+						Application.Current.Dispatcher.Invoke(() => Enabled = x);
 					});
 				}).Start();
 			}

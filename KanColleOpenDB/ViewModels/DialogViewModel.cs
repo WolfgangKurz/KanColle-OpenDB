@@ -11,7 +11,7 @@ namespace KanColleOpenDB.ViewModels
 	{
 		public DialogViewModel()
 		{
-			this.DialogResult = false;
+			this.DialogResult = true;
 		}
 
 		public void OK()
