@@ -41,11 +41,10 @@ namespace KanColleOpenDB.ViewModels
 			set
 			{
 				this._Enabled = value;
+				this.RaisePropertyChanged();
 
 				Properties.Settings.Default["Enabled"] = value;
 				Properties.Settings.Default.Save();
-
-				RaisePropertyChanged();
 			}
 		}
 
@@ -82,7 +81,6 @@ namespace KanColleOpenDB.ViewModels
 			Initialized = true;
 
 			bool IsFirst = (bool)Properties.Settings.Default["IsFirst"];
-			Enabled = (bool)Properties.Settings.Default["Enabled"];
 
 			if(IsFirst || DEBUG) // Is the first load after install?
 			{
@@ -99,10 +97,14 @@ namespace KanColleOpenDB.ViewModels
 							DataContext = vmodel,
 							Owner = Application.Current.MainWindow,
 						};
-						var x = window.ShowDialog() ?? true;
-						Application.Current.Dispatcher.Invoke(() => Enabled = x);
+						window.ShowDialog();
+						Application.Current.Dispatcher.Invoke(() => this.Enabled = vmodel.DialogResult);
 					});
 				}).Start();
+			}
+			else
+			{
+				this.Enabled = (bool)Properties.Settings.Default["Enabled"];
 			}
 
 			// Save IsFirst setting

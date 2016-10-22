@@ -44,7 +44,7 @@
 					  PanningMode="Both"
 					  VerticalScrollBarVisibility="Auto">
 			<StackPanel>
-				<CheckBox IsChecked="{Binding Enabled}"
+				<CheckBox IsChecked="{Binding Enabled, Mode=TwoWay}"
 						  Content="{Binding Resources.Option_Enable, Source={x:Static KanColleOpenDBLibs:ResourceService.Current}, Mode=OneWay}" />
 
 				<TextBlock Margin="20,6,0,0"
