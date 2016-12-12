@@ -23,6 +23,7 @@ This plugin/program will send following statistical data:
 * Slotitem creation data
 * Ship build data
 * Ship drop data
+* Slotitem improvement data
 
 All data will be sent anonymously.
 
