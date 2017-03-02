@@ -24,6 +24,11 @@ namespace KanColleOpenDBStandalone
 		private int WATCHER_PROXY_PORT => 49327;
 		private SessionManager manager;
 
+		/// <summary>
+		/// Map Difficulty Dictionary
+		/// </summary>
+		private Dictionary<int, int> mapRankDict = new Dictionary<int, int>();
+
 		public Watcher()
 		{
 			Setup();
@@ -147,9 +152,9 @@ namespace KanColleOpenDBStandalone
 				y.api_level = x.api_after_slot.api_level;
 			});
 
-		manager.Prepare()
-				.Where(x => x.Request.PathAndQuery == "/kcsapi/api_get_member/slot_item")
-				.TryParse<kcsapi_slotitem[]>().Subscribe(x => updateSlot(x.Data));
+			manager.Prepare()
+					.Where(x => x.Request.PathAndQuery == "/kcsapi/api_get_member/slot_item")
+					.TryParse<kcsapi_slotitem[]>().Subscribe(x => updateSlot(x.Data));
 
 			manager.Prepare()
 				.Where(x => x.Request.PathAndQuery == "/kcsapi/api_req_kousyou/createitem")
@@ -282,12 +287,12 @@ namespace KanColleOpenDBStandalone
 			int drop_node = 0;
 			int drop_maprank = 0;
 
-			var drop_prepare = new Action<kcsapi_start_next>(x =>
+			var drop_prepare = new Action<kcsapi_start_next, bool>((x, y) =>
 			{
 				drop_world = x.api_maparea_id;
 				drop_map = x.api_mapinfo_no;
 				drop_node = x.api_no;
-				drop_maprank = x.api_eventmap?.api_selected_rank ?? 0;
+				if (y) drop_maprank = x.api_eventmap?.api_selected_rank ?? 0;
 				// 0:None, 丙:1, 乙:2, 甲:3
 			});
 			var drop_report = new Action<kcsapi_battleresult>(x =>
@@ -305,7 +310,7 @@ namespace KanColleOpenDBStandalone
 							"map=" + drop_map,
 							"node=" + drop_node,
 							"rank=" + drop_rank,
-							"maprank=" + drop_maprank,
+							"maprank=" + (mapRankDict.ContainsKey(drop_map) ? mapRankDict[drop_map] : drop_maprank),
 							"result=" + drop_shipid
 						});
 
@@ -325,9 +330,9 @@ namespace KanColleOpenDBStandalone
 
 			// To gether Map-id
 			manager.Prepare().Where(x => x.Request.PathAndQuery == "/kcsapi/api_req_map/start")
-				.TryParse<kcsapi_start_next>().Subscribe(x => drop_prepare(x.Data));
+				.TryParse<kcsapi_start_next>().Subscribe(x => drop_prepare(x.Data, true));
 			manager.Prepare().Where(x => x.Request.PathAndQuery == "/kcsapi/api_req_map/next")
-				.TryParse<kcsapi_start_next>().Subscribe(x => drop_prepare(x.Data));
+				.TryParse<kcsapi_start_next>().Subscribe(x => drop_prepare(x.Data, false));
 
 			// To gether dropped ship
 			manager.Prepare().Where(x => x.Request.PathAndQuery == "/kcsapi/api_req_sortie/battleresult")
@@ -345,7 +350,8 @@ namespace KanColleOpenDBStandalone
 					updateDeck(x.Fleets);
 				});
 			manager.Prepare().Where(x => x.Request.PathAndQuery == "/kcsapi/api_get_member/ship3")
-				.TryParse<kcsapi_ship3>().Subscribe(x => {
+				.TryParse<kcsapi_ship3>().Subscribe(x =>
+				{
 					ships = x.Data.api_ship_data;
 					updateDeck(x.Data.api_deck_data);
 				});
@@ -383,7 +389,7 @@ namespace KanColleOpenDBStandalone
 						fleet[fleetId][shipIdx] = ship;
 					}
 
-					this.Flagship = ships.FirstOrDefault(y=>y.api_id==fleet[0][0]).api_ship_id;
+					this.Flagship = ships.FirstOrDefault(y => y.api_id == fleet[0][0]).api_ship_id;
 				});
 
 			manager.Prepare().Where(x => x.Request.PathAndQuery == "/kcsapi/api_get_member/deck")
@@ -397,7 +403,7 @@ namespace KanColleOpenDBStandalone
 
 			// To check deck update and admiral information
 			var memberId = 0;
-			manager.Prepare().Where(x=>x.Request.PathAndQuery== "/kcsapi/api_port/port")
+			manager.Prepare().Where(x => x.Request.PathAndQuery == "/kcsapi/api_port/port")
 				.TryParse<kcsapi_port>().Subscribe(x =>
 				{
 					ships = x.Data.api_ship;
@@ -406,68 +412,60 @@ namespace KanColleOpenDBStandalone
 					memberId = 0;
 					int.TryParse(x.Data.api_basic.api_member_id, out memberId);
 				});
-			manager.Prepare().Where(x=>x.Request.PathAndQuery== "/kcsapi/api_get_member/basic")
+			manager.Prepare().Where(x => x.Request.PathAndQuery == "/kcsapi/api_get_member/basic")
 				.TryParse<kcsapi_basic>().Subscribe(x =>
 				{
 					memberId = 0;
 					int.TryParse(x.Data.api_member_id, out memberId);
 				});
 
-			#endregion
-
-			#region Ranking List
-
-			var host = "";
+			// Map rank getter
 			manager.Prepare()
-				.Where(x => x.Request.PathAndQuery == "/kcsapi/api_req_ranking")
-				.SubscribeRaw(x => host = x.Request.Headers.Host)
-				.TryParse<kcsapi_req_ranking>()
+				.Where(x => x.Request.PathAndQuery.StartsWith("/kcsapi/api_req_map/select_eventmap_rank"))
+				.TryParse<kcsapi_empty_result>()
 				.Subscribe(x =>
 				{
 					if (!x.IsSuccess) return;
 
-					string json = "";
-
-					var page = x.Data.api_disp_page;
-					var offset = (page - 1) * 10;
-					if (offset >= 1000) return; // only ~1000
-
-					var node = "";
-					var nodes = new List<string>();
-					var escape = new Func<string, string>(p => Uri.EscapeDataString(p));
-
-					for (var i = 0; i < x.Data.api_list.Length; i++)
+					int map, rank;
+					try
 					{
-						var named = new named_ranking(x.Data.api_list[i]);
-
-						node = $"{{\"rank\":{named.rank},\"nick\":\"{escape(named.nick)}\","
-							+ $"\"medal\":{named.medal},\"score\":{named.score}}}";
-
-						nodes.Add(node);
+						if (!int.TryParse(x.Request["api_map_no"], out map)) return;
+						if (!int.TryParse(x.Request["api_rank"], out rank)) return;
 					}
-					json = string.Join(",", nodes.ToArray());
+					catch { return; }
 
-					new Thread(() =>
+					if (mapRankDict.ContainsKey(map))
+						mapRankDict.Remove(map);
+
+					mapRankDict.Add(map, rank);
+				});
+
+			manager.Prepare()
+				.Where(x => x.Request.PathAndQuery.StartsWith("/kcsapi/api_get_member/mapinfo"))
+				.TryParse<kcsapi_mapinfo>()
+				.Subscribe(x =>
+				{
+					if (!x.IsSuccess) return;
+
+					int eventMapCount = 0;
+					foreach (var map in x.Data.api_map_info)
 					{
-						string post = string.Join("&", new string[] {
-							"apiver=" + 1,
-							"server=" + host,
-							"key=" + (memberId % 10),
-							"data=" + System.Uri.EscapeDataString($"[{json}]")
-						});
+						if (map.api_eventmap == null) continue;
 
-						int tries = MAX_TRY;
-						while (tries > 0)
+						eventMapCount++;
+						try
 						{
-							var y = HTTPRequest.Post(OpenDBReport + "rank_list.php", post);
-							if (y != null)
+							if (map.api_eventmap.api_selected_rank.HasValue)
 							{
-								y?.Close();
-								break;
+								if (mapRankDict.ContainsKey(eventMapCount))
+									mapRankDict.Remove(eventMapCount);
+
+								mapRankDict.Add(eventMapCount, map.api_eventmap.api_selected_rank.Value);
 							}
-							tries--;
 						}
-					}).Start();
+						catch { continue; }
+					}
 				});
 
 			#endregion

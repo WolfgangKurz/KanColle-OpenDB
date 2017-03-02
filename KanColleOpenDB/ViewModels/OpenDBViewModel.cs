@@ -258,7 +258,7 @@ namespace KanColleOpenDB.ViewModels
 							"map=" + drop_map,
 							"node=" + drop_node,
 							"rank=" + drop_rank,
-							"maprank=" + drop_maprank,
+							"maprank=" + (mapRankDict.ContainsKey(drop_map) ? mapRankDict[drop_map] : drop_maprank),
 							"result=" + drop_shipid
 						});
 
