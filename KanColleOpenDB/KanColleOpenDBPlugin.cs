@@ -27,6 +27,14 @@ namespace KanColleOpenDB
 
 		public void Initialize()
 		{
+			// Load & save old version settings
+			if (Properties.Settings.Default.UpdateSettings)
+			{
+				Properties.Settings.Default.Upgrade();
+				Properties.Settings.Default.UpdateSettings = false;
+				Properties.Settings.Default.Save();
+			}
+
 			this.viewModel = new OpenDBViewModel();
 		}
 	}
