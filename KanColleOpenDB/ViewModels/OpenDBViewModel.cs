@@ -446,7 +446,7 @@ namespace KanColleOpenDB.ViewModels
 					{
 						string post = string.Join("&", new string[] {
 							"apiver=" + this.ExperimentalAge,
-							"api_id=succeeded_expedition",
+							"api_id=expedition",
 							"exp_id=" + c_mission.FirstOrDefault(y=>y.api_name == x.Data.api_quest_name)?.api_id.ToString() ?? "0",
 							"brilliant=" + BrilliantConds,
 							"canister=" + Canisters,
