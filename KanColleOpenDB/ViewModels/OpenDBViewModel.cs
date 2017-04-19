@@ -44,7 +44,6 @@ namespace KanColleOpenDB.ViewModels
 		private int ExperimentalAge => 1;
 
 		#region Enabled Property
-
 		private bool _Enabled;
 		public bool Enabled
 		{
@@ -54,23 +53,29 @@ namespace KanColleOpenDB.ViewModels
 				this._Enabled = value;
 				this.RaisePropertyChanged();
 
-				Properties.Settings.Default["Enabled"] = value;
+				Properties.Settings.Default.Enabled = value;
 				Properties.Settings.Default.Save();
 			}
 		}
+		#endregion
 
+		#region UseExperimental Property
+		public bool UseExperimental
+		{
+			get { return Properties.Settings.Default.UseExperimental == ExperimentalAge; }
+			set
+			{
+				Properties.Settings.Default.UseExperimental = value ? ExperimentalAge : 0;
+				Properties.Settings.Default.Save();
+
+				this.RaisePropertyChanged();
+			}
+		}
 		#endregion
 
 		#region PluginVersion Property
-
 		public string PluginVersion
-		{
-			get
-			{
-				return System.Reflection.Assembly.GetExecutingAssembly().GetName().Version.ToString(4);
-			}
-		}
-
+			=> System.Reflection.Assembly.GetExecutingAssembly().GetName().Version.ToString(4);
 		#endregion
 
 		#region Property for Map Difficulty
@@ -103,7 +108,7 @@ namespace KanColleOpenDB.ViewModels
 				.Where(x => x.IsSuccess)
 				.Subscribe(x =>
 				{
-					x.Data.api_mst_mission = this.c_mission;
+					this.c_mission = x.Data.api_mst_mission;
 				});
 		}
 
