@@ -90,7 +90,7 @@ namespace KanColleOpenDB.ViewModels
 		/// <summary>
 		/// Expedition list
 		/// </summary>
-		kcsapi_mission[] c_mission { get; } = null;
+		kcsapi_mission[] c_mission = null;
 		#endregion
 
 		public OpenDBViewModel()
