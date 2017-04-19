@@ -58,5 +58,17 @@ namespace KanColleOpenDB.Properties {
                 this["UpdateSettings"] = value;
             }
         }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("0")]
+        public int UseExperimental {
+            get {
+                return ((int)(this["UseExperimental"]));
+            }
+            set {
+                this["UseExperimental"] = value;
+            }
+        }
     }
 }

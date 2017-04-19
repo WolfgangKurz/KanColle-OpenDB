@@ -128,12 +128,21 @@
 サーバに転送するオプションは基本的にせっていされています。もし望まない場合はオフにすることができます。</value>
   </data>
   <data name="Option_Enable" xml:space="preserve">
-    <value>統計データをサーバに転送する</value>
+    <value>統計データをサーバーに転送する</value>
   </data>
   <data name="Text_DataInfo" xml:space="preserve">
     <value>プラグインは以下の統計データをサーバーに送信します。</value>
   </data>
   <data name="Text_DatasToSend" xml:space="preserve">
     <value>装備の開発データ、艦娘の建造データ、艦娘のドロップデータ、戦果ランキングリスト、装備改修データ</value>
+  </data>
+  <data name="Text_DatasToSend_Experimental" xml:space="preserve">
+    <value>遠征結果データ（失敗・成功・大成功のどちらか、獲得したアイテム、艦娘の疲労度とドラム缶装備の装着情報を含む）</value>
+  </data>
+  <data name="Text_Experimental" xml:space="preserve">
+    <value>実験的統計をサーバに転送する</value>
+  </data>
+  <data name="Text_Experimental_Description" xml:space="preserve">
+    <value>プラグインは以下の統計データをサーバーに転送します。このでーたは実験的に収集され、廃棄されることもできます。</value>
   </data>
 </root>

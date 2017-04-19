@@ -9,6 +9,8 @@ namespace KanColleOpenDB.ViewModels
 {
 	public class DialogViewModel : WindowViewModel
 	{
+		public bool UseExperimental { get; set; } = false;
+
 		public DialogViewModel()
 		{
 			this.DialogResult = true;

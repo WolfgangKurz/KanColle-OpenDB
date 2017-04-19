@@ -114,5 +114,32 @@ namespace KanColleOpenDB.Properties {
                 return ResourceManager.GetString("Text_DatasToSend", resourceCulture);
             }
         }
+        
+        /// <summary>
+        ///   원정 결과 데이터 (실패/성공/대성공 여부, 획득 아이템, 칸무스 피로도와 드럼통 장비 장착 정보 포함)과(와) 유사한 지역화된 문자열을 찾습니다.
+        /// </summary>
+        public static string Text_DatasToSend_Experimental {
+            get {
+                return ResourceManager.GetString("Text_DatasToSend_Experimental", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   실험적인 통계를 전송합니다.과(와) 유사한 지역화된 문자열을 찾습니다.
+        /// </summary>
+        public static string Text_Experimental {
+            get {
+                return ResourceManager.GetString("Text_Experimental", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   다음과 같은 데이터를 서버로 전송합니다. 이 통계는 실험적으로 수집되며, 사용되지 않고 폐기될 수도 있습니다.과(와) 유사한 지역화된 문자열을 찾습니다.
+        /// </summary>
+        public static string Text_Experimental_Description {
+            get {
+                return ResourceManager.GetString("Text_Experimental_Description", resourceCulture);
+            }
+        }
     }
 }

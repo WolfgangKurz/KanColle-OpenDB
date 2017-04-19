@@ -43,7 +43,7 @@
 		<ScrollViewer Margin="5"
 					  PanningMode="Both"
 					  VerticalScrollBarVisibility="Auto">
-			<StackPanel>
+			<StackPanel Orientation="Vertical">
 				<CheckBox IsChecked="{Binding Enabled, Mode=TwoWay}"
 						  Content="{Binding Resources.Option_Enable, Source={x:Static KanColleOpenDBLibs:ResourceService.Current}, Mode=OneWay}" />
 
@@ -54,6 +54,18 @@
 				<TextBlock Margin="20,4,0,0"
 						   Style="{DynamicResource DefaultTextStyleKey}"
 						   Text="{Binding Resources.Text_DatasToSend, Source={x:Static KanColleOpenDBLibs:ResourceService.Current}, Mode=OneWay}" />
+
+				<CheckBox Margin="0,20,0,0"
+						  IsChecked="{Binding UseExperimental, Mode=TwoWay}"
+						  Content="{Binding Resources.Text_Experimental, Source={x:Static KanColleOpenDBLibs:ResourceService.Current}, Mode=OneWay}" />
+
+				<TextBlock Margin="20,6,0,0"
+						   Style="{DynamicResource DefaultTextStyleKey}"
+						   Text="{Binding Resources.Text_Experimental_Description, Source={x:Static KanColleOpenDBLibs:ResourceService.Current}, Mode=OneWay}" />
+
+				<TextBlock Margin="20,6,0,0"
+						   Style="{DynamicResource DefaultTextStyleKey}"
+						   Text="{Binding Resources.Text_DatasToSend_Experimental, Source={x:Static KanColleOpenDBLibs:ResourceService.Current}, Mode=OneWay}" />
 			</StackPanel>
 		</ScrollViewer>
 

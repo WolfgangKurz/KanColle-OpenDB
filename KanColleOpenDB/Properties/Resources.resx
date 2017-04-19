@@ -136,4 +136,13 @@
   <data name="Text_DatasToSend" xml:space="preserve">
     <value>장비 개발 데이터, 칸무스 건조 데이터, 칸무스 드롭 데이터, 전과 랭킹 리스트, 장비 개수 데이터</value>
   </data>
+  <data name="Text_DatasToSend_Experimental" xml:space="preserve">
+    <value>원정 결과 데이터 (실패/성공/대성공 여부, 획득 아이템, 칸무스 피로도와 드럼통 장비 장착 정보 포함)</value>
+  </data>
+  <data name="Text_Experimental" xml:space="preserve">
+    <value>실험적인 통계를 전송합니다.</value>
+  </data>
+  <data name="Text_Experimental_Description" xml:space="preserve">
+    <value>다음과 같은 데이터를 서버로 전송합니다. 이 통계는 실험적으로 수집되며, 사용되지 않고 폐기될 수도 있습니다.</value>
+  </data>
 </root>

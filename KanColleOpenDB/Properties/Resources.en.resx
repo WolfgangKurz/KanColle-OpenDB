@@ -136,4 +136,13 @@ Send to server option has enabled as default. You can disable if you don't want.
   <data name="Text_DatasToSend" xml:space="preserve">
     <value>Slotitem creation data, Ship build data, Ship drop data, Record ranking list, Slotitem improvement data</value>
   </data>
+  <data name="Text_DatasToSend_Experimental" xml:space="preserve">
+    <value>Expedition Result Data (include Whether failed or succeeded or great success, Obtained item, Ship's condition and Canister item equipped information)</value>
+  </data>
+  <data name="Text_Experimental" xml:space="preserve">
+    <value>Enable sending experimental statistics data to server.</value>
+  </data>
+  <data name="Text_Experimental_Description" xml:space="preserve">
+    <value>The plugin will send the following statistical data to the server. All data will collected experimentally, could be discarded without being used.</value>
+  </data>
 </root>

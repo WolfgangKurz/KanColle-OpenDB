@@ -28,9 +28,20 @@ namespace KanColleOpenDB.ViewModels
 		private bool DEBUG => false;
 #endif
 
-		// OpenDB host
+		/// <summary>
+		/// OpenDB report host
+		/// </summary>
 		private string OpenDBReport => "http://swaytwig.com/opendb/report/";
+
+		/// <summary>
+		/// Retry count
+		/// </summary>
 		private int MAX_TRY => 3;
+
+		/// <summary>
+		/// Age of Experimental
+		/// </summary>
+		private int ExperimentalAge => 1;
 
 		#region Enabled Property
 
@@ -62,10 +73,20 @@ namespace KanColleOpenDB.ViewModels
 
 		#endregion
 
+		#region Property for Map Difficulty
 		/// <summary>
 		/// Map Difficulty Dictionary
 		/// </summary>
 		private Dictionary<int, int> mapRankDict = new Dictionary<int, int>();
+		#endregion
+
+
+		#region Properties for Experimental statistics
+		/// <summary>
+		/// Expedition list
+		/// </summary>
+		kcsapi_mission[] c_mission { get; } = null;
+		#endregion
 
 		public OpenDBViewModel()
 		{
@@ -77,9 +98,16 @@ namespace KanColleOpenDB.ViewModels
 				if (e.PropertyName == nameof(client.IsStarted))
 					Initialize();
 			};
+
+			KanColleClient.Current.Proxy.api_start2.TryParse<kcsapi_start2>()
+				.Where(x => x.IsSuccess)
+				.Subscribe(x =>
+				{
+					x.Data.api_mst_mission = this.c_mission;
+				});
 		}
 
-		private bool Initialized;
+		private bool Initialized { get; set; } = false;
 		private void Initialize()
 		{
 			if (Initialized) return;
@@ -103,7 +131,12 @@ namespace KanColleOpenDB.ViewModels
 							Owner = Application.Current.MainWindow,
 						};
 						window.ShowDialog();
-						Application.Current.Dispatcher.Invoke(() => this.Enabled = vmodel.DialogResult);
+
+						Application.Current.Dispatcher.Invoke(() =>
+						{
+							this.Enabled = vmodel.DialogResult;
+							Properties.Settings.Default.UseExperimental = vmodel.UseExperimental ? this.ExperimentalAge : 0;
+						});
 					});
 				}).Start();
 			}
@@ -113,7 +146,7 @@ namespace KanColleOpenDB.ViewModels
 			}
 
 			// Save IsFirst setting
-			Properties.Settings.Default["IsFirst"] = false;
+			Properties.Settings.Default.IsFirst = false;
 			Properties.Settings.Default.Save();
 
 			var homeport = KanColleClient.Current.Homeport;
@@ -121,7 +154,6 @@ namespace KanColleOpenDB.ViewModels
 			var api_session = proxy.ApiSessionSource;
 
 			#region Development (Create slotitem at arsenal)
-
 			proxy.api_req_kousyou_createitem
 				.TryParse<kcsapi_createitem>()
 				.Where(x => x.IsSuccess).Subscribe(x =>
@@ -169,7 +201,6 @@ namespace KanColleOpenDB.ViewModels
 			#endregion
 
 			#region Construction (Build new ship at arsenal)
-
 			bool ship_dev_wait = false;
 			int ship_dev_dockid = 0;
 
@@ -224,7 +255,6 @@ namespace KanColleOpenDB.ViewModels
 			#endregion
 
 			#region Drop (Get new ship from sea)
-
 			int drop_world = 0;
 			int drop_map = 0;
 			int drop_node = 0;
@@ -287,7 +317,7 @@ namespace KanColleOpenDB.ViewModels
 			// Map rank getter
 			var api_req_select_eventmap_rank = api_session.Where(x => x.Request.PathAndQuery.StartsWith("/kcsapi/api_req_map/select_eventmap_rank"));
 			api_req_select_eventmap_rank
-				.TryParse<kcsapi_empty_result>()
+				.TryParse<KanColleOpenDB.Models.kcsapi_empty_result>()
 				.Where(x => x.IsSuccess)
 				.Subscribe(x =>
 				{
@@ -330,11 +360,9 @@ namespace KanColleOpenDB.ViewModels
 						catch { continue; }
 					}
 				});
-
 			#endregion
 
 			#region Slotitem Improvement (Remodel slotitem)
-
 			proxy.api_req_kousyou_remodel_slot.TryParse<KanColleOpenDB.Models.kcsapi_remodel_slot>()
 				.Where(x => x.IsSuccess).Subscribe(x =>
 				{
@@ -387,6 +415,54 @@ namespace KanColleOpenDB.ViewModels
 						}
 					}).Start();
 				});
+			#endregion
+
+
+			#region Experimental datas
+
+			#region Expedition result data
+			proxy.api_req_mission_result.TryParse<kcsapi_mission_result>()
+				.Where(x => x.IsSuccess)
+				.Subscribe(x =>
+				{
+					///////////////////////////////////////////////////////////////////
+					if (!Enabled) return; // Disabled sending statistics data to server
+					if (this.ExperimentalAge != Properties.Settings.Default.UseExperimental) return; // Disabled or Expired sending experimental statistics data to server
+
+					if (this.c_mission == null) return; // Cannot track expedition id
+
+					var ships = x.Data.api_ship_id.Where(y => y > 0);
+
+					var BrilliantConds = ships.Count(y => homeport.Organization.Ships.FirstOrDefault(z => z.Value.Id == y).Value?.Condition >= 50);
+					var Canisters = ships.Sum(y => homeport.Organization.Ships.FirstOrDefault(z => z.Value.Id == y).Value?.Slots.Count(z => z.Item.Info.Id == 75)) ?? 0; // 75 = Canister
+					var ObtainItems = x.Data.api_useitem_flag;
+
+					new Thread(() =>
+					{
+						string post = string.Join("&", new string[] {
+							"apiver=" + this.ExperimentalAge,
+							"api_id=succeeded_expedition",
+							"exp_id=" + c_mission.FirstOrDefault(y=>y.api_name == x.Data.api_quest_name)?.api_id.ToString() ?? "0",
+							"brilliant=" + BrilliantConds,
+							"canister=" + Canisters,
+							"obtain=" + string.Join(",", ObtainItems),
+							"result=" + x.Data.api_clear_result.ToString()
+						});
+
+						int tries = MAX_TRY;
+						while (tries > 0)
+						{
+							var y = HTTPRequest.Post(OpenDBReport + "experimental.php", post);
+							if (y != null)
+							{
+								y?.Close();
+								break;
+							}
+							tries--;
+						}
+					}).Start();
+				});
+			#endregion
 
 			#endregion
 		}

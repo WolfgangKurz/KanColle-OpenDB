@@ -221,17 +221,8 @@
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>
-    <PostBuildEvent>MKDIR "D:\GAME\KCViewer\Release\KanColleOpenDB\Plugins"
-MKDIR "D:\GAME\KCViewer\Release\KanColleOpenDB\Plugins\en"
-MKDIR "D:\GAME\KCViewer\Release\KanColleOpenDB\Plugins\ja"
-
-COPY "$(TargetPath)" "D:\GAME\KCViewer\Release\KanColleOpenDB\Plugins\KanColleOpenDB.dll"
-COPY "$(TargetDir)en\$(TargetName).resources.dll" "D:\GAME\KCViewer\Release\KanColleOpenDB\Plugins\en\KanColleOpenDB.resources.dll"
-COPY "$(TargetDir)ja\$(TargetName).resources.dll" "D:\GAME\KCViewer\Release\KanColleOpenDB\Plugins\ja\KanColleOpenDB.resources.dll"
-
-COPY "$(TargetPath)" "D:\GAME\KCViewer\KanColleViewer\source\Grabacr07.KanColleViewer\bin\Debug\Plugins\KanColleOpenDB.dll"
-COPY "$(TargetPath)" "D:\GAME\제독업무\Plugins\KanColleOpenDB.dll"
-</PostBuildEvent>
+    <PostBuildEvent>
+    </PostBuildEvent>
   </PropertyGroup>
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.
