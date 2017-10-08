@@ -9,7 +9,7 @@ using System.Runtime.InteropServices;
 [assembly: AssemblyDescription("KanColleOpenDB for KanColleViewer")]
 [assembly: AssemblyCompany("WolfgangKurz")]
 [assembly: AssemblyProduct("KanColleOpenDB")]
-[assembly: AssemblyCopyright("Copyright WolfgangKurz 2016")]
+[assembly: AssemblyCopyright("Copyright WolfgangKurz 2016-2017")]
 [assembly: AssemblyTrademark("KanColleOpenDB")]
 
 // ComVisible을 false로 설정하면 이 어셈블리의 형식이 COM 구성 요소에 
@@ -30,5 +30,5 @@ using System.Runtime.InteropServices;
 // 모든 값을 지정하거나 아래와 같이 '*'를 사용하여 빌드 번호 및 수정 번호가 자동으로 
 // 지정되도록 할 수 있습니다.
 // [assembly: AssemblyVersion("1.0.*")]
-[assembly: AssemblyVersion("1.1.0.0")]
-[assembly: AssemblyFileVersion("1.1.0.0")]
+[assembly: AssemblyVersion("1.1.1.0")]
+[assembly: AssemblyFileVersion("1.1.1.0")]

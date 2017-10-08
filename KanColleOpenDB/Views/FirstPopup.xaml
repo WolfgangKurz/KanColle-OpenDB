@@ -61,6 +61,7 @@
 		<StackPanel Grid.Row="2"
 					Orientation="Vertical"
 					HorizontalAlignment="Left"
+					Visibility="Collapsed"
 					Margin="14,7,14,7">
 			<CheckBox Content="{Binding Resources.Text_Experimental, Source={x:Static KanColleOpenDBLibs:ResourceService.Current}, Mode=OneWay}"
 					  IsChecked="{Binding UseExperimental, Mode=TwoWay}"/>

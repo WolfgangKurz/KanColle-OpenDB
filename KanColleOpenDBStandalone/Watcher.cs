@@ -199,18 +199,19 @@ namespace KanColleOpenDBStandalone
 					new Thread(() =>
 					{
 						string post = string.Join("&", new string[] {
-						"flagship=" + flagship,
-						"fuel=" + material[0],
-						"ammo=" + material[1],
-						"steel=" + material[2],
-						"bauxite=" + material[3],
-						"result=" + item
+							"apiver=" + 2,
+							"flagship=" + flagship,
+							"fuel=" + material[0],
+							"ammo=" + material[1],
+							"steel=" + material[2],
+							"bauxite=" + material[3],
+							"result=" + item
 						});
 
 						int tries = MAX_TRY;
 						while (tries > 0)
 						{
-							var y = HTTPRequest.Post(OpenDBReport + "equip_dev.php", post);
+							var y = HTTPRequest.Post(OpenDBReport + "equip_build.php", post);
 							if (y != null)
 							{
 								y?.Close();
@@ -255,6 +256,7 @@ namespace KanColleOpenDBStandalone
 					new Thread(() =>
 					{
 						string post = string.Join("&", new string[] {
+							"apiver=" + 2,
 							"flagship=" + flagship,
 							"fuel=" + dock.api_item1,
 							"ammo=" + dock.api_item2,
@@ -267,7 +269,7 @@ namespace KanColleOpenDBStandalone
 						int tries = MAX_TRY;
 						while (tries > 0)
 						{
-							var y = HTTPRequest.Post(OpenDBReport + "ship_dev.php", post);
+							var y = HTTPRequest.Post(OpenDBReport + "ship_build.php", post);
 							if (y != null)
 							{
 								y?.Close();
@@ -299,20 +301,45 @@ namespace KanColleOpenDBStandalone
 			{
 				if (this.IsShipLimit) return; // Maximum ship-count
 
+				var drop_inventory = 0;
 				var drop_shipid = 0;
 				var drop_rank = x.api_win_rank;
 				if (x.api_get_ship != null) drop_shipid = x.api_get_ship.api_ship_id;
 
+				/*
+				var tree = new List<int>();
+				if (drop_shipid > 0)
+				{
+					var root = drop_shipid;
+					while (true)
+					{
+						var ship = KanColleClient.Current.Master.Ships.Where(y => int.Parse(y.Value?.RawData?.api_aftershipid ?? "0") == root);
+						if (!ship.Any()) break;
+
+						root = ship.FirstOrDefault().Value?.Id ?? 0;
+					}
+
+					while (!tree.Contains(root) && root > 0)
+					{
+						tree.Add(root);
+
+						var ship = KanColleClient.Current.Master.Ships.FirstOrDefault(y => y.Value.Id == root);
+						root = int.Parse(ship.Value?.RawData?.api_aftershipid ?? "0");
+					}
+					drop_inventory = homeport.Organization.Ships.Count(y => tree.Contains(y.Value.Info.Id));
+				}
+				*/
+
 				new Thread(() =>
 				{
 					string post = string.Join("&", new string[] {
-							"world=" + drop_world,
-							"map=" + drop_map,
-							"node=" + drop_node,
-							"rank=" + drop_rank,
-							"maprank=" + (mapRankDict.ContainsKey(drop_map) ? mapRankDict[drop_map] : drop_maprank),
-							"result=" + drop_shipid
-						});
+						"world=" + drop_world,
+						"map=" + drop_map,
+						"node=" + drop_node,
+						"rank=" + drop_rank,
+						"maprank=" + (mapRankDict.ContainsKey(drop_map) ? mapRankDict[drop_map] : drop_maprank),
+						"result=" + drop_shipid
+					});
 
 					int tries = MAX_TRY;
 					while (tries > 0)

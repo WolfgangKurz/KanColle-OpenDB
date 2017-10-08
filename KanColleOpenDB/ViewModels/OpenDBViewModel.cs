@@ -9,8 +9,10 @@ using MetroTrilithon.Mvvm;
 using Livet;
 
 using Grabacr07.KanColleViewer;
-using Grabacr07.KanColleWrapper;
 using Grabacr07.KanColleWrapper.Models.Raw;
+using Grabacr07.KanColleWrapper;
+
+using Logger = KanColleOpenDB.Models.Logger;
 
 using KanColleOpenDB.Libs;
 using KanColleOpenDB.Models;
@@ -36,7 +38,7 @@ namespace KanColleOpenDB.ViewModels
 		/// <summary>
 		/// Retry count
 		/// </summary>
-		private int MAX_TRY => 3;
+		private const int MAX_TRY = 3;
 
 		/// <summary>
 		/// Age of Experimental
@@ -87,10 +89,6 @@ namespace KanColleOpenDB.ViewModels
 
 
 		#region Properties for Experimental statistics
-		/// <summary>
-		/// Expedition list
-		/// </summary>
-		kcsapi_mission[] c_mission = null;
 		#endregion
 
 		public OpenDBViewModel()
@@ -103,13 +101,6 @@ namespace KanColleOpenDB.ViewModels
 				if (e.PropertyName == nameof(client.IsStarted))
 					Initialize();
 			};
-
-			KanColleClient.Current.Proxy.api_start2.TryParse<kcsapi_start2>()
-				.Where(x => x.IsSuccess)
-				.Subscribe(x =>
-				{
-					this.c_mission = x.Data.api_mst_mission;
-				});
 		}
 
 		private bool Initialized { get; set; } = false;
@@ -163,45 +154,65 @@ namespace KanColleOpenDB.ViewModels
 				.TryParse<kcsapi_createitem>()
 				.Where(x => x.IsSuccess).Subscribe(x =>
 				{
-					///////////////////////////////////////////////////////////////////
-					if (!Enabled) return; // Disabled sending statistics data to server
-
-					var item = 0; // Failed to build
-					if (x.Data.api_create_flag == 1)
-						item = x.Data.api_slot_item.api_slotitem_id;
-
-					var material = new int[] {
-						int.Parse(x.Request["api_item1"]),
-						int.Parse(x.Request["api_item2"]),
-						int.Parse(x.Request["api_item3"]),
-						int.Parse(x.Request["api_item4"])
-					};
-					var flagship = homeport.Organization.Fleets[1].Ships[0].Info.Id;
-
-					new Thread(() =>
+					try
 					{
-						string post = string.Join("&", new string[] {
-							"apiver=" + 2,
-							"flagship=" + flagship,
-							"fuel=" + material[0],
-							"ammo=" + material[1],
-							"steel=" + material[2],
-							"bauxite=" + material[3],
-							"result=" + item
-						});
+						Logger.Log("found", "equip_build");
 
-						int tries = MAX_TRY;
-						while (tries > 0)
+						///////////////////////////////////////////////////////////////////
+						if (!Enabled) return; // Disabled sending statistics data to server
+
+						var item = 0; // Failed to build
+						if (x.Data.api_create_flag == 1)
+							item = x.Data.api_slot_item.api_slotitem_id;
+
+						var material = new int[] {
+							int.Parse(x.Request["api_item1"]),
+							int.Parse(x.Request["api_item2"]),
+							int.Parse(x.Request["api_item3"]),
+							int.Parse(x.Request["api_item4"])
+						};
+						var flagship = homeport.Organization.Fleets[1].Ships[0].Info.Id;
+
+						Logger.Log($"item:{item}, material:{{{string.Join(",", material)}}}, flagship:{flagship}", "equip_build");
+
+						new Thread(() =>
 						{
-							var y = HTTPRequest.Post(OpenDBReport + "equip_dev.php", post);
-							if (y != null)
+							try
 							{
-								y?.Close();
-								break;
+								string post = string.Join("&", new string[] {
+									"apiver=" + 2,
+									"flagship=" + flagship,
+									"fuel=" + material[0],
+									"ammo=" + material[1],
+									"steel=" + material[2],
+									"bauxite=" + material[3],
+									"result=" + item
+								});
+
+								int tries = MAX_TRY;
+								while (tries > 0)
+								{
+									var y = HTTPRequest.Post(OpenDBReport + "equip_build.php", post);
+									if (y != null)
+									{
+										Logger.Log("reported", "equip_build");
+										y?.Close();
+										break;
+									}
+									Logger.Log($"failed, retrying ({tries}/{MAX_TRY})", "equip_build");
+									tries--;
+								}
 							}
-							tries--;
-						}
-					}).Start();
+							catch (Exception e)
+							{
+								Logger.LogException(this, e, "equip_build reporting");
+							}
+						}).Start();
+					}
+					catch (Exception e)
+					{
+						Logger.LogException(this, e, "equip_build assembling");
+					}
 				});
 			#endregion
 
@@ -221,41 +232,61 @@ namespace KanColleOpenDB.ViewModels
 				.Where(x => x.IsSuccess)
 				.Subscribe(x =>
 				{
-					if (!ship_dev_wait) return; // Not created
-					ship_dev_wait = false;
-
-					///////////////////////////////////////////////////////////////////
-					if (!Enabled) return; // Disabled sending statistics data to server
-
-					var dock = x.Data.SingleOrDefault(y => y.api_id == ship_dev_dockid);
-					var flagship = homeport.Organization.Fleets[1].Ships[0].Info.Id;
-					var ship = dock.api_created_ship_id;
-
-					new Thread(() =>
+					try
 					{
-						string post = string.Join("&", new string[] {
-							"apiver=" + 2,
-							"flagship=" + flagship,
-							"fuel=" + dock.api_item1,
-							"ammo=" + dock.api_item2,
-							"steel=" + dock.api_item3,
-							"bauxite=" + dock.api_item4,
-							"material=" + dock.api_item5,
-							"result=" + ship
-						});
+						if (!ship_dev_wait) return; // Not created
+						ship_dev_wait = false;
 
-						int tries = MAX_TRY;
-						while (tries > 0)
+						Logger.Log("found", "ship_build");
+
+						///////////////////////////////////////////////////////////////////
+						if (!Enabled) return; // Disabled sending statistics data to server
+
+						var dock = x.Data.SingleOrDefault(y => y.api_id == ship_dev_dockid);
+						var flagship = homeport.Organization.Fleets[1].Ships[0].Info.Id;
+						var ship = dock.api_created_ship_id;
+
+						Logger.Log($"res:{{{dock.api_item1},{dock.api_item2},{dock.api_item3},{dock.api_item4},{dock.api_item5}}}, flagship:{flagship}, result:{ship}", "ship_build");
+
+						new Thread(() =>
 						{
-							var y = HTTPRequest.Post(OpenDBReport + "ship_dev.php", post);
-							if (y != null)
+							try
 							{
-								y?.Close();
-								break;
+								string post = string.Join("&", new string[] {
+									"apiver=" + 2,
+									"flagship=" + flagship,
+									"fuel=" + dock.api_item1,
+									"ammo=" + dock.api_item2,
+									"steel=" + dock.api_item3,
+									"bauxite=" + dock.api_item4,
+									"material=" + dock.api_item5,
+									"result=" + ship
+								});
+
+								int tries = MAX_TRY;
+								while (tries > 0)
+								{
+									var y = HTTPRequest.Post(OpenDBReport + "ship_build.php", post);
+									if (y != null)
+									{
+										Logger.Log("reported", "ship_build");
+										y?.Close();
+										break;
+									}
+									Logger.Log($"failed, retrying ({tries}/{MAX_TRY})", "ship_build");
+									tries--;
+								}
 							}
-							tries--;
-						}
-					}).Start();
+							catch (Exception e)
+							{
+								Logger.LogException(this, e, "ship_build assembling");
+							}
+						}).Start();
+					}
+					catch (Exception e)
+					{
+						Logger.LogException(this, e, "ship_build assembling");
+					}
 				});
 			#endregion
 
@@ -275,40 +306,86 @@ namespace KanColleOpenDB.ViewModels
 			});
 			var drop_report = new Action<kcsapi_battleresult>(x =>
 			{
-				///////////////////////////////////////////////////////////////////
-				if (!Enabled) return; // Disabled sending statistics data to server
-
-				if (homeport.Organization.Ships.Count >= homeport.Admiral.MaxShipCount)
-					return; // Maximum ship-count
-
-				var drop_shipid = 0;
-				var drop_rank = x.api_win_rank;
-				if (x.api_get_ship != null) drop_shipid = x.api_get_ship.api_ship_id;
-
-				new Thread(() =>
+				try
 				{
-					string post = string.Join("&", new string[] {
-							"apiver=" + 3,
-							"world=" + drop_world,
-							"map=" + drop_map,
-							"node=" + drop_node,
-							"rank=" + drop_rank,
-							"maprank=" + (mapRankDict.ContainsKey(drop_map) ? mapRankDict[drop_map] : drop_maprank),
-							"result=" + drop_shipid
-						});
+					///////////////////////////////////////////////////////////////////
+					if (!Enabled) return; // Disabled sending statistics data to server
 
-					int tries = MAX_TRY;
-					while (tries > 0)
+					Logger.Log("found", "ship_drop");
+
+					if (homeport.Organization.Ships.Count >= homeport.Admiral.MaxShipCount)
+						return; // Maximum ship-count
+
+					var drop_inventory = 0;
+					var drop_shipid = 0;
+					var drop_rank = x.api_win_rank;
+					if (x.api_get_ship != null) drop_shipid = x.api_get_ship.api_ship_id;
+
+					Logger.Log("inventory calculating", "ship_drop");
+
+					var tree = new List<int>();
+					if (drop_shipid > 0)
 					{
-						var y = HTTPRequest.Post(OpenDBReport + "ship_drop.php", post);
-						if (y != null)
+						var root = drop_shipid;
+						while (true)
 						{
-							y?.Close();
-							break;
+							var ship = KanColleClient.Current.Master.Ships.Where(y => int.Parse(y.Value?.RawData?.api_aftershipid ?? "0") == root);
+							if (!ship.Any()) break;
+
+							root = ship.FirstOrDefault().Value?.Id ?? 0;
 						}
-						tries--;
+
+						while (!tree.Contains(root) && root > 0)
+						{
+							tree.Add(root);
+
+							var ship = KanColleClient.Current.Master.Ships.FirstOrDefault(y => y.Value.Id == root);
+							root = int.Parse(ship.Value?.RawData?.api_aftershipid ?? "0");
+						}
+						drop_inventory = homeport.Organization.Ships.Count(y => tree.Contains(y.Value.Info.Id));
 					}
-				}).Start();
+
+					Logger.Log($"world:{drop_world}, map:{drop_map}, node:{drop_node}, rank:{drop_rank}, maprank:{(mapRankDict.ContainsKey(drop_map) ? mapRankDict[drop_map] : drop_maprank)}, inventory:{drop_inventory}, result:{drop_shipid}", "ship_drop");
+
+					new Thread(() =>
+					{
+						try
+						{
+							string post = string.Join("&", new string[] {
+								"apiver=" + 4,
+								"world=" + drop_world,
+								"map=" + drop_map,
+								"node=" + drop_node,
+								"rank=" + drop_rank,
+								"maprank=" + (mapRankDict.ContainsKey(drop_map) ? mapRankDict[drop_map] : drop_maprank),
+								"inventory=" + drop_inventory,
+								"result=" + drop_shipid
+							});
+
+							int tries = MAX_TRY;
+							while (tries > 0)
+							{
+								var y = HTTPRequest.Post(OpenDBReport + "ship_drop.php", post);
+								if (y != null)
+								{
+									Logger.Log("reported", "ship_drop");
+									y?.Close();
+									break;
+								}
+								Logger.Log($"failed, retrying ({tries}/{MAX_TRY})", "ship_drop");
+								tries--;
+							}
+						}
+						catch (Exception e)
+						{
+							Logger.LogException(this, e, "ship_drop reporting");
+						}
+					}).Start();
+				}
+				catch (Exception e)
+				{
+					Logger.LogException(this, e, "ship_drop assembling");
+				}
 			});
 
 			// To gether Map-id
@@ -371,103 +448,79 @@ namespace KanColleOpenDB.ViewModels
 			proxy.api_req_kousyou_remodel_slot.TryParse<KanColleOpenDB.Models.kcsapi_remodel_slot>()
 				.Where(x => x.IsSuccess).Subscribe(x =>
 				{
-					///////////////////////////////////////////////////////////////////
-					if (!Enabled) return; // Disabled sending statistics data to server
-
-					if (int.Parse(x.Request["api_certain_flag"]) == 1) return; // 100% improvement option used
-
-					var item = x.Data.api_remodel_id[0]; // Slotitem master id
-					var flagship = homeport.Organization.Fleets[1].Ships[0].Info.Id; // Flagship (Akashi or Akashi Kai)
-					var assistant = x.Data.api_voice_ship_id; // Assistant ship master id
-					var level = 0; // After level
-					var result = x.Data.api_remodel_flag; // Is succeeded?
-
-					// !!! api_after_slot is null when failed to improve !!!
-
-					if (result == 1)
+					try
 					{
-						level = x.Data.api_after_slot.api_level - 1;
-						if (level < 0) level = 10;
-					}
-					else
-					{
-						level = homeport.Itemyard.SlotItems[
-							int.Parse(x.Request["api_slot_id"])
-						].Level;
-					}
+						Logger.Log("found", "equip_remodel");
 
-					new Thread(() =>
-					{
-						string post = string.Join("&", new string[] {
-							"apiver=" + 2,
-							"flagship=" + flagship,
-							"assistant=" + assistant,
-							"item=" + item,
-							"level=" + level,
-							"result=" + result
-						});
+						///////////////////////////////////////////////////////////////////
+						if (!Enabled) return; // Disabled sending statistics data to server
 
-						int tries = MAX_TRY;
-						while (tries > 0)
+						if (int.Parse(x.Request["api_certain_flag"]) == 1) return; // 100% improvement option used
+
+						var item = x.Data.api_remodel_id[0]; // Slotitem master id
+						var flagship = homeport.Organization.Fleets[1].Ships[0].Info.Id; // Flagship (Akashi or Akashi Kai)
+						var assistant = x.Data.api_voice_ship_id; // Assistant ship master id
+						var level = 0; // After level
+						var result = x.Data.api_remodel_flag; // Is succeeded?
+
+						// !!! api_after_slot is null when failed to improve !!!
+
+						if (result == 1)
 						{
-							var y = HTTPRequest.Post(OpenDBReport + "equip_remodel.php", post);
-							if (y != null)
-							{
-								y?.Close();
-								break;
-							}
-							tries--;
+							level = x.Data.api_after_slot.api_level - 1;
+							if (level < 0) level = 10;
 						}
-					}).Start();
+						else
+						{
+							level = homeport.Itemyard.SlotItems[
+								int.Parse(x.Request["api_slot_id"])
+							].Level;
+						}
+
+						Logger.Log($"flagship:{flagship}, assistant:{assistant}, item:{item}, level:{level}, result:{result}", "equip_remodel");
+
+						new Thread(() =>
+						{
+							try
+							{
+								string post = string.Join("&", new string[] {
+									"apiver=" + 2,
+									"flagship=" + flagship,
+									"assistant=" + assistant,
+									"item=" + item,
+									"level=" + level,
+									"result=" + result
+								});
+
+								int tries = MAX_TRY;
+								while (tries > 0)
+								{
+									var y = HTTPRequest.Post(OpenDBReport + "equip_remodel.php", post);
+									if (y != null)
+									{
+										Logger.Log("reported", "equip_remodel");
+										y?.Close();
+										break;
+									}
+									Logger.Log($"failed, retrying ({tries}/{MAX_TRY})", "equip_remodel");
+									tries--;
+								}
+							}
+							catch (Exception e)
+							{
+								Logger.LogException(this, e, "equip_remodel assembling");
+							}
+						}).Start();
+					}
+					catch (Exception e)
+					{
+						Logger.LogException(this, e, "equip_remodel assembling");
+					}
 				});
 			#endregion
 
 
 			#region Experimental datas
-
-			#region Expedition result data
-			proxy.api_req_mission_result.TryParse<kcsapi_mission_result>()
-				.Where(x => x.IsSuccess)
-				.Subscribe(x =>
-				{
-					///////////////////////////////////////////////////////////////////
-					if (!Enabled) return; // Disabled sending statistics data to server
-					if (this.ExperimentalAge != Properties.Settings.Default.UseExperimental) return; // Disabled or Expired sending experimental statistics data to server
-
-					if (this.c_mission == null) return; // Cannot track expedition id
-
-					var ships = x.Data.api_ship_id.Where(y => y > 0);
-
-					var BrilliantConds = ships.Count(y => homeport.Organization.Ships.FirstOrDefault(z => z.Value.Id == y).Value?.Condition >= 50);
-					var Canisters = ships.Sum(y => homeport.Organization.Ships.FirstOrDefault(z => z.Value.Id == y).Value?.Slots.Count(z => z.Item.Info.Id == 75)) ?? 0; // 75 = Canister
-					var ObtainItems = x.Data.api_useitem_flag;
-
-					new Thread(() =>
-					{
-						string post = string.Join("&", new string[] {
-							"apiver=" + this.ExperimentalAge,
-							"api_id=expedition",
-							"exp_id=" + c_mission.FirstOrDefault(y=>y.api_name == x.Data.api_quest_name)?.api_id.ToString() ?? "0",
-							"brilliant=" + BrilliantConds,
-							"canister=" + Canisters,
-							"obtain=" + string.Join(",", ObtainItems),
-							"result=" + x.Data.api_clear_result.ToString()
-						});
-
-						int tries = MAX_TRY;
-						while (tries > 0)
-						{
-							var y = HTTPRequest.Post(OpenDBReport + "experimental.php", post);
-							if (y != null)
-							{
-								y?.Close();
-								break;
-							}
-							tries--;
-						}
-					}).Start();
-				});
-			#endregion
 
 			#endregion
 		}
