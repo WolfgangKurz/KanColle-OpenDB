@@ -27,8 +27,8 @@ This plugin/program will send following statistical data:
 All data will be sent anonymously.
 
 ## 📄 License
-* [The MIT License (MIT)](https://github.com/WolfgangKurz/Z-Subtitle/blob/master/LICENSE) for Plugin/Program
-* [The Apache License 2.0](https://github.com/WolfgangKurz/OpenDB-Backup/blob/master/LICENSE) for Database
+* [The MIT License (MIT)](https://github.com/WolfgangKurz/KanColle-OpenDB/blob/master/LICENSE) for Plugin/Program
+* [The Apache License 2.0](https://github.com/WolfgangKurz/KanColle-OpenDB-Backup/blob/master/LICENSE) for Database
 
 ## ⚠ Caution
 ```diff
