@@ -139,6 +139,7 @@
   <ItemGroup>
     <Compile Include="Libs\HTTPRequest.cs" />
     <Compile Include="Libs\ResourceService.cs" />
+    <Compile Include="Models\battle_base.cs" />
     <Compile Include="Models\kcsapi_empty_result.cs" />
     <Compile Include="Models\kcsapi_eventmap.cs" />
     <Compile Include="Models\kcsapi_mapinfo.cs" />

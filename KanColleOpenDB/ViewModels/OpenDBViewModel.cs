@@ -4,6 +4,7 @@ using System.Collections.ObjectModel;
 using System.Diagnostics;
 using System.Linq;
 using System.Reactive.Linq;
+using System.Text;
 using Nekoxy;
 using MetroTrilithon.Mvvm;
 using Livet;
@@ -111,7 +112,7 @@ namespace KanColleOpenDB.ViewModels
 
 			bool IsFirst = Properties.Settings.Default.IsFirst;
 
-			if(IsFirst || DEBUG) // Is the first load after install?
+			if (IsFirst || DEBUG) // Is the first load after install?
 			{
 				new Thread(() =>
 				{
@@ -296,6 +297,38 @@ namespace KanColleOpenDB.ViewModels
 			int drop_node = 0;
 			int drop_maprank = 0;
 
+			int drop_formation = 0;
+			int[] drop_ships = new int[6];
+			int[] drop_ships2 = null;
+			Action<battle_base, int> drop_update_enemy = (data, formation) =>
+			{
+				drop_formation = formation;
+				drop_ships =
+					data.api_ship_ke
+						?.Skip(1) // skip first (always -1)
+						?.Take(6) // next 6 entities
+						?.Select(x => x == -1 ? 0 : x)
+						?.ToArray();
+				drop_ships2 =
+					data.api_ship_ke_combined
+						?.Skip(1) // skip first (always -1)
+						?.Take(6) // next 6 entities
+						?.Select(x => x == -1 ? 0 : x)
+						?.ToArray()
+					?? null;
+			};
+			Func<string> drop_make_enemy = () =>
+			{
+				var sb = new StringBuilder();
+				sb.Append("{");
+				sb.AppendFormat("\"formation\":{0}", drop_formation);
+				sb.AppendFormat(",\"ships\":[{0}]", string.Join(",", drop_ships));
+				if (drop_ships2 != null)
+					sb.AppendFormat(",\"ships2\":[{0}]", string.Join(",", drop_ships2));
+				sb.Append("}");
+				return sb.ToString();
+			};
+
 			var drop_prepare = new Action<kcsapi_start_next, bool>((x, y) =>
 			{
 				drop_world = x.api_maparea_id;
@@ -352,12 +385,13 @@ namespace KanColleOpenDB.ViewModels
 						try
 						{
 							string post = string.Join("&", new string[] {
-								"apiver=" + 4,
+								"apiver=" + 5,
 								"world=" + drop_world,
 								"map=" + drop_map,
 								"node=" + drop_node,
 								"rank=" + drop_rank,
 								"maprank=" + (mapRankDict.ContainsKey(drop_map) ? mapRankDict[drop_map] : drop_maprank),
+								"enemy=" + drop_make_enemy(),
 								"inventory=" + drop_inventory,
 								"result=" + drop_shipid
 							});
@@ -391,6 +425,52 @@ namespace KanColleOpenDB.ViewModels
 			// To gether Map-id
 			proxy.api_req_map_start.TryParse<kcsapi_start_next>().Subscribe(x => drop_prepare(x.Data, true));
 			proxy.api_req_map_next.TryParse<kcsapi_start_next>().Subscribe(x => drop_prepare(x.Data, false));
+
+
+			#region 통상 - 주간전
+			proxy.api_req_sortie_battle
+				.TryParse<battle_base>().Subscribe(x => drop_update_enemy(x.Data, x.Data.api_formation[1]));
+			#endregion
+
+			#region 통상 - 개막야전
+			proxy.ApiSessionSource.Where(x => x.Request.PathAndQuery == "/kcsapi/api_req_battle_midnight/sp_midnight")
+				.TryParse<battle_base>().Subscribe(x => drop_update_enemy(x.Data, x.Data.api_formation[1]));
+			#endregion
+
+			#region 항공전 - 주간전 / 공습전 - 주간전
+			proxy.ApiSessionSource.Where(x => x.Request.PathAndQuery == "/kcsapi/api_req_sortie/airbattle")
+				.TryParse<battle_base>().Subscribe(x => drop_update_enemy(x.Data, x.Data.api_formation[1]));
+
+			proxy.ApiSessionSource.Where(x => x.Request.PathAndQuery == "/kcsapi/api_req_sortie/ld_airbattle")
+				.TryParse<battle_base>().Subscribe(x => drop_update_enemy(x.Data, x.Data.api_formation[1]));
+			#endregion
+
+			#region 연합함대 - 주간전
+			proxy.api_req_combined_battle_battle
+				.TryParse<battle_base>().Subscribe(x => drop_update_enemy(x.Data, x.Data.api_formation[1]));
+
+			proxy.ApiSessionSource.Where(x => x.Request.PathAndQuery == "/kcsapi/api_req_combined_battle/battle_water")
+				.TryParse<battle_base>().Subscribe(x => drop_update_enemy(x.Data, x.Data.api_formation[1]));
+			#endregion
+
+			#region 연합vs연합 - 주간전
+			proxy.ApiSessionSource.Where(x => x.Request.PathAndQuery == "/kcsapi/api_req_combined_battle/ec_battle")
+				.TryParse<battle_base>().Subscribe(x => drop_update_enemy(x.Data, x.Data.api_formation[1]));
+
+			proxy.ApiSessionSource.Where(x => x.Request.PathAndQuery == "/kcsapi/api_req_combined_battle/each_battle")
+				.TryParse<battle_base>().Subscribe(x => drop_update_enemy(x.Data, x.Data.api_formation[1]));
+
+			proxy.ApiSessionSource.Where(x => x.Request.PathAndQuery == "/kcsapi/api_req_combined_battle/each_battle_water")
+				.TryParse<battle_base>().Subscribe(x => drop_update_enemy(x.Data, x.Data.api_formation[1]));
+			#endregion
+
+			#region 연합함대 - 항공전 / 공습전
+			proxy.api_req_combined_battle_airbattle
+				.TryParse<battle_base>().Subscribe(x => drop_update_enemy(x.Data, x.Data.api_formation[1]));
+
+			proxy.ApiSessionSource.Where(x => x.Request.PathAndQuery == "/kcsapi/api_req_combined_battle/ld_airbattle")
+				.TryParse<battle_base>().Subscribe(x => drop_update_enemy(x.Data, x.Data.api_formation[1]));
+			#endregion
 
 			// To gether dropped ship
 			proxy.api_req_sortie_battleresult.TryParse<kcsapi_battleresult>().Subscribe(x => drop_report(x.Data));
