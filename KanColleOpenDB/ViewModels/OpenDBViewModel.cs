@@ -303,19 +303,19 @@ namespace KanColleOpenDB.ViewModels
 			Action<battle_base, int> drop_update_enemy = (data, formation) =>
 			{
 				drop_formation = formation;
-				drop_ships =
-					data.api_ship_ke
-						?.Skip(1) // skip first (always -1)
-						?.Take(6) // next 6 entities
-						?.Select(x => x == -1 ? 0 : x)
-						?.ToArray();
-				drop_ships2 =
-					data.api_ship_ke_combined
-						?.Skip(1) // skip first (always -1)
-						?.Take(6) // next 6 entities
-						?.Select(x => x == -1 ? 0 : x)
-						?.ToArray()
-					?? null;
+
+				drop_ships = new int[6];
+				Array.Copy(data.api_ship_ke, drop_ships, data.api_ship_ke.Length);
+
+				if (data.api_ship_ke_combined != null)
+				{
+					drop_ships2 = new int[6];
+					Array.Copy(data.api_ship_ke_combined, drop_ships2, data.api_ship_ke_combined.Length);
+				}
+				else
+					drop_ships2 = null;
+
+				
 			};
 			Func<string> drop_make_enemy = () =>
 			{
