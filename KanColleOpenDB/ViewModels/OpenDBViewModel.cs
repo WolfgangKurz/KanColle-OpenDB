@@ -337,7 +337,7 @@ namespace KanColleOpenDB.ViewModels
 				if(y) drop_maprank = x.api_eventmap?.api_selected_rank ?? 0;
 				// 0:None, 丙:1, 乙:2, 甲:3
 			});
-			var drop_report = new Action<kcsapi_battleresult>(x =>
+			var drop_report = new Action<kcsapi_battle_result>(x =>
 			{
 				try
 				{
@@ -473,8 +473,8 @@ namespace KanColleOpenDB.ViewModels
 			#endregion
 
 			// To gether dropped ship
-			proxy.api_req_sortie_battleresult.TryParse<kcsapi_battleresult>().Subscribe(x => drop_report(x.Data));
-			proxy.api_req_combined_battle_battleresult.TryParse<kcsapi_battleresult>().Subscribe(x => drop_report(x.Data));
+			proxy.api_req_sortie_battleresult.TryParse<kcsapi_battle_result>().Subscribe(x => drop_report(x.Data));
+			proxy.api_req_combined_battle_battleresult.TryParse<kcsapi_battle_result>().Subscribe(x => drop_report(x.Data));
 
 			// Map rank getter
 			var api_req_select_eventmap_rank = api_session.Where(x => x.Request.PathAndQuery.StartsWith("/kcsapi/api_req_map/select_eventmap_rank"));
