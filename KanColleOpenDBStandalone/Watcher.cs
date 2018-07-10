@@ -18,7 +18,7 @@ namespace KanColleOpenDBStandalone
 	{
 		private delegate void SessionHandler(Nekoxy.Session session);
 
-		private string OpenDBReport => "http://swaytwig.com/opendb/report/";
+		private string OpenDBReport => "http://opendb.swaytwig.com/report/";
 		private int MAX_TRY => 3;
 
 		private int WATCHER_PROXY_PORT => 49327;
@@ -449,7 +449,7 @@ namespace KanColleOpenDBStandalone
 			// Map rank getter
 			manager.Prepare()
 				.Where(x => x.Request.PathAndQuery.StartsWith("/kcsapi/api_req_map/select_eventmap_rank"))
-				.TryParse<kcsapi_empty_result>()
+				.TryParse<KanColleOpenDBStandalone.Models.kcsapi_empty_result>()
 				.Subscribe(x =>
 				{
 					if (!x.IsSuccess) return;
