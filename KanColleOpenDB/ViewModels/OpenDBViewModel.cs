@@ -305,20 +305,29 @@ namespace KanColleOpenDB.ViewModels
 				drop_formation = formation;
 
 				drop_ships = new int[6];
-				Array.Copy(data.api_ship_ke, drop_ships, data.api_ship_ke.Length);
-
-				if (data.api_ship_ke_combined != null)
+				if (data != null)
 				{
-					drop_ships2 = new int[6];
-					Array.Copy(data.api_ship_ke_combined, drop_ships2, data.api_ship_ke_combined.Length);
+					Array.Copy(data.api_ship_ke, drop_ships, data.api_ship_ke.Length);
+
+					if (data.api_ship_ke_combined != null)
+					{
+						drop_ships2 = new int[6];
+						Array.Copy(data.api_ship_ke_combined, drop_ships2, data.api_ship_ke_combined.Length);
+					}
+					else
+						drop_ships2 = null;
 				}
 				else
-					drop_ships2 = null;
-
-				
+				{
+					drop_ships = drop_ships2 = null;
+				}
 			};
 			Func<string> drop_make_enemy = () =>
 			{
+				if (drop_formation <= 0
+					|| drop_ships == null
+					|| drop_ships2 == null) return "";
+
 				var sb = new StringBuilder();
 				sb.Append("{");
 				sb.AppendFormat("\"formation\":{0}", drop_formation);
@@ -432,7 +441,10 @@ namespace KanColleOpenDB.ViewModels
 				.TryParse<battle_base>().Subscribe(x => drop_update_enemy(x.Data, x.Data.api_formation[1]));
 			#endregion
 
-			#region 통상 - 개막야전
+			#region 통상 - 야전 / 통상 - 개막야전
+			proxy.ApiSessionSource.Where(x => x.Request.PathAndQuery == "/kcsapi/api_req_battle_midnight/battle")
+				.TryParse<battle_base>().Subscribe(x => drop_update_enemy(x.Data, x.Data.api_formation[1]));
+
 			proxy.ApiSessionSource.Where(x => x.Request.PathAndQuery == "/kcsapi/api_req_battle_midnight/sp_midnight")
 				.TryParse<battle_base>().Subscribe(x => drop_update_enemy(x.Data, x.Data.api_formation[1]));
 			#endregion
@@ -469,6 +481,24 @@ namespace KanColleOpenDB.ViewModels
 				.TryParse<battle_base>().Subscribe(x => drop_update_enemy(x.Data, x.Data.api_formation[1]));
 
 			proxy.ApiSessionSource.Where(x => x.Request.PathAndQuery == "/kcsapi/api_req_combined_battle/ld_airbattle")
+				.TryParse<battle_base>().Subscribe(x => drop_update_enemy(x.Data, x.Data.api_formation[1]));
+			#endregion
+
+			#region 연합함대 - 야전
+			proxy.ApiSessionSource.Where(x => x.Request.PathAndQuery == "/kcsapi/api_req_combined_battle/midnight_battle")
+				.TryParse<battle_base>().Subscribe(x => drop_update_enemy(x.Data, x.Data.api_formation[1]));
+
+			proxy.ApiSessionSource.Where(x => x.Request.PathAndQuery == "/kcsapi/api_req_combined_battle/sp_midnight")
+				.TryParse<battle_base>().Subscribe(x => drop_update_enemy(x.Data, x.Data.api_formation[1]));
+			#endregion
+
+			#region vs 연합 - 야전
+			proxy.ApiSessionSource.Where(x => x.Request.PathAndQuery == "/kcsapi/api_req_combined_battle/ec_midnight_battle")
+				.TryParse<battle_base>().Subscribe(x => drop_update_enemy(x.Data, x.Data.api_formation[1]));
+			#endregion
+
+			#region vs 연합 - 야전>주간전
+			proxy.ApiSessionSource.Where(x => x.Request.PathAndQuery == "/kcsapi/api_req_combined_battle/ec_night_to_day")
 				.TryParse<battle_base>().Subscribe(x => drop_update_enemy(x.Data, x.Data.api_formation[1]));
 			#endregion
 
