@@ -345,6 +345,9 @@ namespace KanColleOpenDB.ViewModels
 				drop_node = x.api_no;
 				if(y) drop_maprank = x.api_eventmap?.api_selected_rank ?? 0;
 				// 0:None, 丙:1, 乙:2, 甲:3
+
+				drop_formation = 0;
+				drop_ships = drop_ships2 = null;
 			});
 			var drop_report = new Action<kcsapi_battleresult>(x =>
 			{
